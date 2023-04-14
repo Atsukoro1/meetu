@@ -42,7 +42,7 @@ const StepOne = () => {
             <label>Bio</label>
             <div className="mt-2">
                 <textarea
-                    className="textarea textarea-primary w-full placeholder:text-orange-200 placeholder:opacity-30"
+                    className="textarea textarea-primary w-full"
                     placeholder="Some short text about you..."
                     value={data.bio}
                     onChange={(e) => {
