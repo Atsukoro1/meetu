@@ -58,9 +58,11 @@ model Social {
     id            String   @id @default(cuid())
     type          SocialType
 
-    
+    url           String
+    text          String?
+
     userId        String
-    user          User  @relation(fields: [userId], references: [socials])
+    user          User  @relation(fields: [userId], references: [id])
 }
 
 model VerificationToken {
