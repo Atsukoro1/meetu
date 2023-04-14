@@ -47,6 +47,11 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   },
+  pages: {
+    signIn: '/',
+    error: '/',
+    newUser: '/setup'
+  },
   adapter: PrismaAdapter(prisma),
   providers: [
     DiscordProvider({
