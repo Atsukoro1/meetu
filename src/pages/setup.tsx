@@ -1,8 +1,12 @@
-import { GetServerSidePropsContext, NextPage } from "next";
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+import { FilePond, registerPlugin } from "react-filepond";
+import { Social, SocialType } from "@prisma/client";
+import { GetServerSidePropsContext } from "next";
 import { AiOutlinePlus } from "react-icons/ai";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { ImCross } from "react-icons/im";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 const StepOne = () => {
@@ -55,12 +59,28 @@ const StepOne = () => {
 
 const StepTwo = () => {
     const [newHobby, setNewHobby] = useState<string>("");
-    const [data, setData] = useState<{ hobbies: string[] }>({
-        hobbies: []
+    const [newSocialData, setNewSocialData] = useState<Omit<Social, "id" | "userId">>({
+        url: "",
+        text: "",
+        type: SocialType.URL
+    });
+    const [data, setData] = useState<{ hobbies: string[], socials: Social[] }>({
+        hobbies: [],
+        socials: []
     });
 
+    const changeSocialData = <T extends keyof typeof newSocialData,>(
+        key: T,
+        value: typeof newSocialData[T]
+    ): void => {
+        setNewSocialData({
+            ...newSocialData,
+            [key]: value
+        });
+    }
+
     const pushHobbies = () => {
-        if(newHobby === '') return;
+        if (newHobby === '') return;
 
         data.hobbies.push(newHobby);
         setData({
@@ -74,7 +94,7 @@ const StepTwo = () => {
     const removeHobby = (content: string) => {
         const index = data.hobbies.findIndex(el => el === content);
 
-        if(index !== -1) {
+        if (index !== -1) {
             data.hobbies.splice(index, 1)
             setData({
                 ...data,
@@ -88,15 +108,15 @@ const StepTwo = () => {
             <div className="flex flex-row">
                 <div className="form-control">
                     <label className="mb-1 mt-4">Add hobbies</label>
-                    <div className="flex flex-row gap-2 flex-[0 1 200px] mb-2">
+                    <div className="flex flex-wrap gap-2 w-[500px] mb-2">
                         {data.hobbies.map(el => {
                             return (
-                                <div 
+                                <div
                                     className="badge badge-primary gap-2"
                                     onClick={() => removeHobby(el)}
                                 >
-                                    <ImCross 
-                                        className="text-neutral hover:opacity-60 hover:cursor-pointer" 
+                                    <ImCross
+                                        className="text-neutral hover:opacity-60 hover:cursor-pointer"
                                         size={10}
                                     />
 
@@ -124,6 +144,36 @@ const StepTwo = () => {
                     </div>
 
                     <label className="mb-1 mt-4">Add socials</label>
+                    <div>
+                        <select
+                            value={newSocialData.type}
+                            onChange={(e) => {
+                                changeSocialData("type", e.target.value as SocialType);
+                            }}
+                            className="select select-bordered w-full max-w-xs mt-2"
+                        >
+                            <option value={SocialType.DISCORD}>Discord</option>
+                            <option value={SocialType.EMAIL}>Email</option>
+                            <option value={SocialType.GITHUB}>Github</option>
+                            <option value={SocialType.URL}>Url</option>
+                        </select>
+
+                        <input
+                            type="text"
+                            placeholder="Text"
+                            className="input input-bordered block mt-3"
+                            value={newSocialData.text || ""}
+                            onChange={(e) => changeSocialData("text", e.target.value)}
+                        />
+
+                        <input
+                            type="text"
+                            placeholder="Url / content"
+                            className="input input-bordered mt-3 mb-3"
+                            value={newSocialData.url}
+                            onChange={(e) => changeSocialData("url", e.target.value)}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
@@ -131,9 +181,30 @@ const StepTwo = () => {
 }
 
 const StepThree = () => {
+    registerPlugin(FilePondPluginImagePreview);
+
     return (
         <div className="mt-2">
+            <label className="mb-1 mt-6">Upload profile picture</label>
 
+            <div className="mt-3">
+                <FilePond
+                    allowMultiple={false}
+                    maxFiles={1}
+                    name="files"
+                    labelIdle='Drag & Drop your profile picture <span class="filepond--label-action">or click here</span>'
+                />
+            </div>
+
+            <label className="mb-1 mt-4">Upload banner</label>
+            <div className="mt-3">
+                <FilePond
+                    allowMultiple={false}
+                    maxFiles={1}
+                    name="files"
+                    labelIdle='Drag & Drop your profile picture <span class="filepond--label-action">or click here</span>'
+                />
+            </div>
         </div>
     )
 }
@@ -141,16 +212,22 @@ const StepThree = () => {
 const StepFour = () => {
     return (
         <div className="mt-2">
-
+            <h2 className="text-2xl font-bold mb-1 mt-4">Well done!</h2>
+            <p className="table w-[400px] mb-4">You're now ready to explore the MEETU network!</p>
         </div>
     )
 }
 
-const SetupPage: NextPage = () => {
+const SetupPage = () => {
     const [page, setPage] = useState<number>(1);
+    const router = useRouter();
 
     const incrementPage = () => {
         setPage(page + 1);
+
+        if(page > 3) {
+            router.push("/app");
+        }
     }
 
     const renderPage = () => {

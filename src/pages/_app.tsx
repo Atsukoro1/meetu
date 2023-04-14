@@ -3,8 +3,10 @@ import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { api } from "@/utils/api";
 
-import "@/styles/globals.css";
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
+import 'filepond/dist/filepond.min.css';
 import "daisyui/dist/full.css";
+import "@/styles/globals.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
