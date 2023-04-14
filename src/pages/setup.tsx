@@ -1,19 +1,36 @@
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import { FilePond, registerPlugin } from "react-filepond";
 import { Social, SocialType } from "@prisma/client";
+import SocialBadge from '@/components/SocialBadge';
 import { GetServerSidePropsContext } from "next";
 import { AiOutlinePlus } from "react-icons/ai";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import { ImCross } from "react-icons/im";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from '@/utils/api';
+import { prisma } from '@/server/db';
 
-const StepOne = () => {
-    const [data, setData] = useState({
+interface StepOneResult {
+    age: number;
+    bio: string;
+}
+
+interface StepTwoResult { 
+    hobbies: string[], 
+    socials: Omit<Social, 'userId' | 'id'>[] 
+}
+
+const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
+    const [data, setData] = useState<StepOneResult>({
         age: 0,
         bio: ""
     });
+
+    useEffect(() => {
+        onResult(data);
+    }, [data]);
 
     return (
         <div className="mt-2">
@@ -57,17 +74,21 @@ const StepOne = () => {
     )
 }
 
-const StepTwo = () => {
+const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
     const [newHobby, setNewHobby] = useState<string>("");
     const [newSocialData, setNewSocialData] = useState<Omit<Social, "id" | "userId">>({
         url: "",
         text: "",
         type: SocialType.URL
     });
-    const [data, setData] = useState<{ hobbies: string[], socials: Social[] }>({
+    const [data, setData] = useState<StepTwoResult>({
         hobbies: [],
         socials: []
     });
+
+    useEffect(() => {
+        onResult(data);
+    }, [data]);
 
     const changeSocialData = <T extends keyof typeof newSocialData,>(
         key: T,
@@ -101,6 +122,20 @@ const StepTwo = () => {
                 hobbies: data.hobbies
             });
         }
+    }
+
+    const addSocial = () => {
+        data.socials.push(newSocialData);
+        setData({
+            ...data,
+            socials: data.socials
+        });
+
+        setNewSocialData({
+            url: "",
+            text: "",
+            type: SocialType.URL
+        });
     }
 
     return (
@@ -145,6 +180,12 @@ const StepTwo = () => {
 
                     <label className="mb-1 mt-4">Add socials</label>
                     <div>
+                        <div className='flex flex-wrap max-w-[400px]'>
+                            {data.socials.map(el => {
+                                return (<SocialBadge social={el}/>)
+                            })}
+                        </div>
+
                         <select
                             value={newSocialData.type}
                             onChange={(e) => {
@@ -173,6 +214,13 @@ const StepTwo = () => {
                             value={newSocialData.url}
                             onChange={(e) => changeSocialData("url", e.target.value)}
                         />
+
+                        <button 
+                            className='ml-3 btn btn-primary'
+                            onClick={addSocial}
+                        >
+                            Add
+                        </button>
                     </div>
                 </div>
             </div>
@@ -219,10 +267,28 @@ const StepFour = () => {
 }
 
 const SetupPage = () => {
+    const [stepOneResult, setStepOneResult] = useState<StepOneResult>();
+    const [stepTwoResult, setStepTwoResult] = useState<StepTwoResult>();
+
+    const updateUser = api.user.updateUser.useMutation();
     const [page, setPage] = useState<number>(1);
     const router = useRouter();
 
     const incrementPage = () => {
+        switch(page) {
+            case 1: 
+                updateUser.mutateAsync(stepOneResult as any);
+                break;
+            case 2: 
+                updateUser.mutateAsync(stepTwoResult as any) 
+                break;
+            case 4: 
+                updateUser.mutateAsync({
+                    setupDone: true
+                })
+                break;
+        }
+
         setPage(page + 1);
 
         if(page > 3) {
@@ -232,10 +298,14 @@ const SetupPage = () => {
 
     const renderPage = () => {
         switch (page) {
-            case 1: return <StepOne />
-            case 2: return <StepTwo />
-            case 3: return <StepThree />
-            case 4: return <StepFour />
+            case 1: return <StepOne onResult={(data) => {
+                setStepOneResult(data);
+            }}/>
+            case 2: return <StepTwo onResult={(data) => {
+                setStepTwoResult(data);
+            }}/>
+            case 3: return <StepThree/>
+            case 4: return <StepFour/>
         }
     }
 
@@ -271,9 +341,24 @@ export default SetupPage;
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     const session = await getServerSession(context.req, context.res, authOptions);
 
+
     if (!session) {
         return { redirect: { destination: "/" } };
     }
+
+    const user = await prisma.user.findFirst({
+        where: {
+            id: session.user.id
+        }
+    });
+
+    if(user?.setupDone) {
+        return {
+            redirect: {
+                destination: "/app"
+            }
+        }
+    };
 
     return {
         props: {}

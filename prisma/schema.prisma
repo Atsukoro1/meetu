@@ -62,7 +62,7 @@ model Social {
     type          SocialType
 
     url           String
-    text          String?
+    text          String
 
     userId        String
     user          User  @relation(fields: [userId], references: [id])

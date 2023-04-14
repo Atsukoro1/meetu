@@ -7,6 +7,7 @@ import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import 'filepond/dist/filepond.min.css'
 import "daisyui/dist/full.css";
 import "@/styles/globals.css";
+import Navbar from "@/components/Navbar";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -14,7 +15,8 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <div data-theme="night">
+      <div data-theme="forest">
+        <Navbar/>
         <Component {...pageProps} />
       </div>
     </SessionProvider>

@@ -91,9 +91,7 @@ const Profile = () => {
                         </a>
                     </div>
 
-                    <div className="mt-2">
-                        {Tab}
-                    </div>
+                    <div className="mt-2">{Tab}</div>
                 </div>
             </div>
         </div>
