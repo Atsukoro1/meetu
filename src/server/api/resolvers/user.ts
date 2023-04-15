@@ -10,6 +10,7 @@ export const updateUserResolver = async (
             id: user.id   
         },
         data: {
+            ...data.gender && { gender: data.gender },
             ...data.age && { age: data.age },
             ...data.bio && { bio: data.bio },
             ...data.hobbies && { hobbies: data.hobbies },

@@ -1,8 +1,9 @@
-import { SocialType } from "@prisma/client";
+import { Gender, SocialType } from "@prisma/client";
 import { z } from "zod";
 
 export const UpdateUserSchema = z.object({
   setupDone: z.boolean().optional(),
+  gender: z.enum([Gender.FEMALE, Gender.MALE]).optional(),
   hobbies: z.array(z.string()).optional(),
   age: z.number().optional(),
   image: z.string().optional(),

@@ -1,6 +1,6 @@
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import { FilePond, registerPlugin } from "react-filepond";
-import { Social, SocialType } from "@prisma/client";
+import { Gender, Social, SocialType } from "@prisma/client";
 import SocialBadge from '@/components/SocialBadge';
 import { GetServerSidePropsContext } from "next";
 import { AiOutlinePlus } from "react-icons/ai";
@@ -15,21 +15,27 @@ import { prisma } from '@/server/db';
 interface StepOneResult {
     age: number;
     bio: string;
+    gender: Gender
 }
 
-interface StepTwoResult { 
-    hobbies: string[], 
-    socials: Omit<Social, 'userId' | 'id'>[] 
+interface StepTwoResult {
+    hobbies: string[],
+    socials: Omit<Social, 'userId' | 'id'>[]
 }
 
 const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
     const [data, setData] = useState<StepOneResult>({
         age: 0,
-        bio: ""
+        bio: "",
+        gender: Gender.MALE
     });
 
     useEffect(() => {
-        onResult(data);
+
+        onResult({
+            ...data,
+            gender: data.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE
+        });
     }, [data]);
 
     return (
@@ -57,7 +63,7 @@ const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
             </div>
 
             <label>Bio</label>
-            <div className="mt-2">
+            <div className="mt-2 mb-4">
                 <textarea
                     className="textarea textarea-primary w-full"
                     placeholder="Some short text about you..."
@@ -69,6 +75,25 @@ const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
                         })
                     }}
                 />
+            </div>
+
+            <label>Gender</label>
+            <div className="form-control mb-2">
+                <label className="label cursor-pointer w-fit gap-2">
+                    <span className="label-text">Male</span>
+                    <input 
+                        type="checkbox" 
+                        className="toggle toggle-primary" 
+                        checked={data.gender === Gender.MALE} 
+                        onChange={() => {
+                            setData({
+                                ...data,
+                                gender: data.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE
+                            })
+                        }}
+                    />
+                    <span className="label-text">Female</span>
+                </label>
             </div>
         </div>
     )
@@ -182,7 +207,7 @@ const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
                     <div>
                         <div className='flex flex-wrap max-w-[400px]'>
                             {data.socials.map(el => {
-                                return (<SocialBadge social={el}/>)
+                                return (<SocialBadge social={el} />)
                             })}
                         </div>
 
@@ -215,7 +240,7 @@ const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
                             onChange={(e) => changeSocialData("url", e.target.value)}
                         />
 
-                        <button 
+                        <button
                             className='ml-3 btn btn-primary'
                             onClick={addSocial}
                         >
@@ -275,14 +300,14 @@ const SetupPage = () => {
     const router = useRouter();
 
     const incrementPage = () => {
-        switch(page) {
-            case 1: 
+        switch (page) {
+            case 1:
                 updateUser.mutateAsync(stepOneResult as any);
                 break;
-            case 2: 
-                updateUser.mutateAsync(stepTwoResult as any) 
+            case 2:
+                updateUser.mutateAsync(stepTwoResult as any)
                 break;
-            case 4: 
+            case 4:
                 updateUser.mutateAsync({
                     setupDone: true
                 })
@@ -291,7 +316,7 @@ const SetupPage = () => {
 
         setPage(page + 1);
 
-        if(page > 3) {
+        if (page > 3) {
             router.push("/app");
         }
     }
@@ -300,12 +325,12 @@ const SetupPage = () => {
         switch (page) {
             case 1: return <StepOne onResult={(data) => {
                 setStepOneResult(data);
-            }}/>
+            }} />
             case 2: return <StepTwo onResult={(data) => {
                 setStepTwoResult(data);
-            }}/>
-            case 3: return <StepThree/>
-            case 4: return <StepFour/>
+            }} />
+            case 3: return <StepThree />
+            case 4: return <StepFour />
         }
     }
 
@@ -352,7 +377,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
         }
     });
 
-    if(user?.setupDone) {
+    if (user?.setupDone) {
         return {
             redirect: {
                 destination: "/app"

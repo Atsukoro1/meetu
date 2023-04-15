@@ -1,3 +1,5 @@
+import { prisma } from "@/server/db";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import { useMemo, useState } from "react";
 
 const AboutTab = () => {
@@ -24,17 +26,17 @@ const FollowingTab = () => {
     )
 };
 
-const Profile = () => {
+const Profile = ({ user }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
     const [activeTab, setActiveTab] = useState<number>(1);
 
     const Tab = useMemo(() => {
-        switch(activeTab) {
-            case 1: return <AboutTab/>;
-            case 2: return <PostsTab/>
-            case 3: return <FollowingTab/>
+        switch (activeTab) {
+            case 1: return <AboutTab />;
+            case 2: return <PostsTab />
+            case 3: return <FollowingTab />
         }
     }, [activeTab]);
-    
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
             <div className="card-normal bg-neutral h-fit overflow-hidden">
@@ -58,32 +60,30 @@ const Profile = () => {
                         </div>
 
                         <div className="flex flex-row">
-                            <h2 className="text-2xl font-bold mt-[-15px] ml-4">Atsukoro</h2>
-                            <div className="badge badge-outline badge-primary mt-[-5px] ml-2">17y.o Male</div>
+                            <h2 className="text-2xl font-bold mt-[-15px] ml-4">{user.name}</h2>
+                            <div className="badge badge-outline badge-primary mt-[-5px] ml-2">{user.age}y.o {user.gender}</div>
                         </div>
                     </div>
 
                     <div className="mt-4">
                         <label className="text-lg font-semibold">Bio</label>
-                        <div className="table w-fit max-w-[500px] bg-base-100 p-2 rounded-lg">
-                            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Error veritatis enim repellendus sapiente sunt adipisci quisquam nobis earum perspiciatis at, quod aperiam expedita suscipit corporis eaque deserunt numquam tempora assumenda?
-                        </div>
+                        <div className="table w-fit max-w-[500px] bg-base-100 p-2 rounded-lg">{user.bio}</div>
                     </div>
 
                     <div className="tabs tabs-boxed mt-5">
-                        <a 
+                        <a
                             onClick={() => setActiveTab(1)}
                             className={`tab w-1/3 ${activeTab === 1 && 'tab-active'}`}
                         >
                             About info
                         </a>
-                        <a                            
-                            onClick={() => setActiveTab(2)} 
+                        <a
+                            onClick={() => setActiveTab(2)}
                             className={`tab w-1/3 ${activeTab === 2 && 'tab-active'}`}
                         >
                             Posts
                         </a>
-                        <a                             
+                        <a
                             onClick={() => setActiveTab(3)}
                             className={`tab w-1/3 ${activeTab === 3 && 'tab-active'}`}
                         >
@@ -99,3 +99,27 @@ const Profile = () => {
 }
 
 export default Profile;
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+    if(!context.query.slug || typeof context.query.slug !== 'string') return {
+        redirect: '/404'
+    };
+
+    const user = await prisma.user.findFirst({
+        where: {
+            slug: context.query.slug
+        }
+    });
+
+    if(!user) {
+        return {
+            redirect: '/404'
+        }
+    }
+
+    return {
+        props: {
+            user: user
+        }
+    }
+}
