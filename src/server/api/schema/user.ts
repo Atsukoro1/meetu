@@ -7,6 +7,7 @@ export const UpdateUserSchema = z.object({
   hobbies: z.array(z.string()).optional(),
   age: z.number().optional(),
   image: z.string().optional(),
+  banner: z.string().optional(),
   bio: z.string().optional(),
   socials: z
     .array(

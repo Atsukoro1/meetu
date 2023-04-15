@@ -50,6 +50,7 @@ model User {
     hobbies       String[]  @default([])
     age           Int?  
     image         String?
+    banner        String?
     bio           String?
     socials       Social[]
 

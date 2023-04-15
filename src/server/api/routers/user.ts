@@ -13,12 +13,12 @@ export const userRouter = createTRPCRouter({
   folllowUser: protectedProcedure
     .input(z.string())
     .mutation(({ ctx, input }) => {
-      return followUserResolver(ctx, input);
+      return followUserResolver(ctx.session, input); 
     }),
 
   unfollowUser: protectedProcedure
     .input(z.string())
     .mutation(({ ctx, input }) => {
-      return unfollowUserResolver(ctx, input);
+      return unfollowUserResolver(ctx.session, input);
     })
 });

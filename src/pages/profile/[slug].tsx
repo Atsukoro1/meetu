@@ -1,11 +1,36 @@
-import { prisma } from "@/server/db";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import { authOptions } from "@/server/auth";
+import { prisma } from "@/server/db";
+import { api } from "@/utils/api";
+import { getServerSession } from "next-auth";
 import { useMemo, useState } from "react";
+import SocialBadge from "@/components/SocialBadge";
 
-const AboutTab = () => {
+const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
     return (
         <div>
-            About
+            <label>Hobbies</label>
+            <div className="mt-1.5 mb-3 flex flex-wrap max-w-[400px] gap-2">
+                {user.hobbies && user.hobbies.map(el => {
+                    return (
+                        <div
+                            key={el}
+                            className="badge badge-primary gap-2"
+                        >
+                            {el}
+                        </div>
+                    )
+                })}
+            </div>
+
+            <label>Socials</label>
+            <div className="mt-1.5 mb-3 flex flex-wrap max-w-[400px] gap-2">
+                {user.socials && user.socials.map(el => {
+                    return (
+                        <SocialBadge key={el.id} social={el}/>
+                    )
+                })}
+            </div>
         </div>
     )
 };
@@ -26,12 +51,24 @@ const FollowingTab = () => {
     )
 };
 
-const Profile = ({ user }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+    const [following, setFollowing] = useState<boolean>(isFollowing);
     const [activeTab, setActiveTab] = useState<number>(1);
+
+    const followUser = api.user.folllowUser.useMutation({
+        onSuccess: () => {
+            setFollowing(true);
+        }
+    });
+    const unfollowUser = api.user.unfollowUser.useMutation({
+        onSuccess: () => {
+            setFollowing(false);
+        }
+    })
 
     const Tab = useMemo(() => {
         switch (activeTab) {
-            case 1: return <AboutTab />;
+            case 1: return <AboutTab user={user} />;
             case 2: return <PostsTab />
             case 3: return <FollowingTab />
         }
@@ -42,12 +79,21 @@ const Profile = ({ user }: InferGetServerSidePropsType<typeof getServerSideProps
             <div className="card-normal bg-neutral h-fit overflow-hidden">
                 <div>
                     <img
-                        src="https://c4.wallpaperflare.com/wallpaper/923/689/83/japan-sakura-pink-beautiful-wallpaper-preview.jpg"
+                        src={user.banner as string}
                         className="rounded-xl h-[195px] w-[550px] object-cover"
                     />
 
-                    <button className="btn relative top-[-60px] left-[450px]">
-                        Follow
+                    <button
+                        className={`btn relative top-[-60px] ${following ? "left-[420px]" : "left-[450px]"}`}
+                        onClick={() => {
+                            if (following) {
+                                unfollowUser.mutateAsync(user.id);
+                            } else {
+                                followUser.mutateAsync(user.id);
+                            }
+                        }}
+                    >
+                        {following ? "Following" : "Follow"}
                     </button>
                 </div>
 
@@ -55,7 +101,7 @@ const Profile = ({ user }: InferGetServerSidePropsType<typeof getServerSideProps
                     <div className="flex flex-row mt-[-50px]">
                         <div className="avatar online mt-[-70px]">
                             <div className="w-24 rounded-xl">
-                                <img src="https://cdn.discordapp.com/avatars/937757295453044806/1eaa758caacdc9a7f92bb49617d91be0.webp" />
+                                <img src={user.image as string} />
                             </div>
                         </div>
 
@@ -101,25 +147,40 @@ const Profile = ({ user }: InferGetServerSidePropsType<typeof getServerSideProps
 export default Profile;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-    if(!context.query.slug || typeof context.query.slug !== 'string') return {
+    const session = await getServerSession(context.req, context.res, authOptions);
+
+    if (!context.query.slug || typeof context.query.slug !== 'string' || !session) return {
         redirect: '/404'
     };
 
     const user = await prisma.user.findFirst({
         where: {
             slug: context.query.slug
+        },
+        include: {
+            socials: true
         }
     });
 
-    if(!user) {
+    if (!user) {
         return {
             redirect: '/404'
         }
     }
 
+    const existingRelation = await prisma.userFollows.findUnique({
+        where: {
+            followerId_followingId: {
+                followerId: user.id,
+                followingId: session.user.id,
+            },
+        },
+    });
+
     return {
         props: {
-            user: user
+            user: user,
+            isFollowing: !!existingRelation
         }
     }
 }

@@ -11,6 +11,9 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { api } from '@/utils/api';
 import { prisma } from '@/server/db';
+import { uploadFile } from '@/utils/supabase';
+import { useSession } from 'next-auth/react';
+import { env } from '@/env.mjs';
 
 interface StepOneResult {
     age: number;
@@ -21,6 +24,11 @@ interface StepOneResult {
 interface StepTwoResult {
     hobbies: string[],
     socials: Omit<Social, 'userId' | 'id'>[]
+}
+
+interface StepThreeResult {
+    image: string;
+    banner: string;
 }
 
 const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
@@ -253,7 +261,17 @@ const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
     )
 }
 
-const StepThree = () => {
+const StepThree = ({ onResult }: { onResult: (data: StepThreeResult) => void }) => {
+    const [result, setResult] = useState<StepThreeResult>({
+        image: "",
+        banner: ""
+    });
+    const { data } = useSession();
+
+    useEffect(() => {
+        onResult(result);
+    }, [result]);
+
     registerPlugin(FilePondPluginImagePreview);
 
     return (
@@ -265,6 +283,22 @@ const StepThree = () => {
                     allowMultiple={false}
                     maxFiles={1}
                     name="files"
+                    onaddfile={async (error, file) => {
+                        if(error) return;
+
+                        if(await uploadFile(
+                            `pfps/${data?.user.id}`, 
+                            new File([file.file], file.file.name, {
+                                type: file.file.type,
+                            }), 
+                            "test"
+                        )) {
+                            setResult({
+                                ...result,
+                                image: `${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/pfps/${data?.user.id}`
+                            });
+                        };
+                    }}
                     labelIdle='Drag & Drop your profile picture <span class="filepond--label-action">or click here</span>'
                 />
             </div>
@@ -275,6 +309,22 @@ const StepThree = () => {
                     allowMultiple={false}
                     maxFiles={1}
                     name="files"
+                    onaddfile={async (error, file) => {
+                        if(error) return;
+
+                        if(await uploadFile(
+                            `banner/${data?.user.id}`, 
+                            new File([file.file], file.file.name, {
+                                type: file.file.type,
+                            }), 
+                            "test"
+                        )) {
+                            setResult({
+                                ...result,
+                                banner: `${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/banner/${data?.user.id}`
+                            });
+                        };
+                    }}
                     labelIdle='Drag & Drop your profile picture <span class="filepond--label-action">or click here</span>'
                 />
             </div>
@@ -294,6 +344,7 @@ const StepFour = () => {
 const SetupPage = () => {
     const [stepOneResult, setStepOneResult] = useState<StepOneResult>();
     const [stepTwoResult, setStepTwoResult] = useState<StepTwoResult>();
+    const [stepThreeResult, setStepThreeResult] = useState<StepThreeResult>();
 
     const updateUser = api.user.updateUser.useMutation();
     const [page, setPage] = useState<number>(1);
@@ -306,6 +357,9 @@ const SetupPage = () => {
                 break;
             case 2:
                 updateUser.mutateAsync(stepTwoResult as any)
+                break;
+            case 3: 
+                updateUser.mutateAsync(stepThreeResult as any);
                 break;
             case 4:
                 updateUser.mutateAsync({
@@ -329,7 +383,9 @@ const SetupPage = () => {
             case 2: return <StepTwo onResult={(data) => {
                 setStepTwoResult(data);
             }} />
-            case 3: return <StepThree />
+            case 3: return <StepThree onResult={(data) => {
+                setStepThreeResult(data);
+            }}/>
             case 4: return <StepFour />
         }
     }

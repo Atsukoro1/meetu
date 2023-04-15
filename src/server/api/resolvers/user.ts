@@ -35,22 +35,6 @@ export const unfollowUserResolver = async (
     });
 }
 
-export const isFollowingResolver = async (
-    { user }: any,
-    userId: string
-): Promise<boolean> => {
-    const existingRelation = await prisma.userFollows.findUnique({
-        where: {
-          followerId_followingId: {
-            followerId: userId,
-            followingId: user.id,
-          },
-        },
-    });
-    
-    return !!existingRelation;
-}
-
 export const updateUserResolver = async (
     { user }: any,
     data: typeof UpdateUserSchema._input
@@ -65,6 +49,7 @@ export const updateUserResolver = async (
             ...data.bio && { bio: data.bio },
             ...data.hobbies && { hobbies: data.hobbies },
             ...data.image && { image: data.image },
+            ...data.banner && { banner: data.banner },
             ...data.setupDone && { setupDone: data.setupDone },
             ...data.socials && {
                 socials: {
