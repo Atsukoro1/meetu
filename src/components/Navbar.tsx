@@ -1,4 +1,6 @@
+import slugify from "@/utils/slugify";
 import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 
 const Navbar = () => {
     const { data } = useSession();
@@ -6,7 +8,9 @@ const Navbar = () => {
     return (
         <div className="navbar bg-neutral">
             <div className="flex-1">
-                <a className="btn btn-ghost normal-case text-xl">MEETU</a>
+                <Link className="btn btn-ghost normal-case text-xl" href="/app">
+                    MEETU
+                </Link>
             </div>
             <div className="flex-none">
                 {data?.user
@@ -18,12 +22,14 @@ const Navbar = () => {
                                 </div>
                             </label>
                             <ul tabIndex={0} className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
-                                <li>
-                                    <a className="justify-between">
-                                        Profile
-                                        <span className="badge">New</span>
-                                    </a>
-                                </li>
+                                <Link href={`/profile/${slugify(data.user.name || "")}`}>
+                                    <li>
+                                        <a className="justify-between">
+                                            Profile
+                                            <span className="badge">New</span>
+                                        </a>
+                                    </li>
+                                </Link>
                                 <li onClick={() => signOut()}><a>Logout</a></li>
                             </ul>
                         </div>

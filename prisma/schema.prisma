@@ -55,6 +55,18 @@ model User {
 
     accounts      Account[]
     sessions      Session[]
+
+    following     UserFollows[]  @relation("FollowsRelation")
+    followers     UserFollows[]  @relation("FollowedByRelation")
+}
+
+model UserFollows {
+    followerId    String
+    followingId   String
+    follower      User      @relation("FollowsRelation", fields: [followerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+    following     User      @relation("FollowedByRelation", fields: [followingId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+    @@id([followerId, followingId])
 }
 
 enum SocialType {
