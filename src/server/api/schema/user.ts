@@ -24,3 +24,9 @@ export const UpdateUserSchema = z.object({
     )
     .optional(),
 });
+
+export const FetchFollowingSchema = z.object({
+  page: z.number().default(1),
+  perPage: z.number().default(10),
+  userId: z.string()
+});

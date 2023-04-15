@@ -47,20 +47,6 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
-    async signIn({ user }) {
-      if(user.name) {
-        await prisma.user.update({
-          where: {
-            id: user.id
-          },
-          data: {
-            slug: slugify(user.name)
-          }
-        });
-      }
-
-      return true;
-    }
   },
   pages: {
     signIn: '/',

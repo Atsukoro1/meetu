@@ -5,6 +5,8 @@ import { api } from "@/utils/api";
 import { getServerSession } from "next-auth";
 import { useMemo, useState } from "react";
 import SocialBadge from "@/components/SocialBadge";
+import ProfileCard from "@/components/ProfileCard";
+import Skeleton from "@/components/Skeleton";
 
 const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
     return (
@@ -27,7 +29,7 @@ const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSid
             <div className="mt-1.5 mb-3 flex flex-wrap max-w-[400px] gap-2">
                 {user.socials && user.socials.map(el => {
                     return (
-                        <SocialBadge key={el.id} social={el}/>
+                        <SocialBadge key={el.id} social={el} />
                     )
                 })}
             </div>
@@ -35,18 +37,33 @@ const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSid
     )
 };
 
-const PostsTab = () => {
+const PostsTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
     return (
         <div>
-            Posts
+
         </div>
     )
 };
 
-const FollowingTab = () => {
+const FollowingTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
+    const followings = api.user.getFollowing.useQuery({
+        userId: user.id
+    });
+
     return (
-        <div>
-            Following
+        <div className="gap-3">
+            {followings.isLoading ? (
+                <Skeleton
+                    width={"100%"}
+                    height="100px"
+                />
+            ) : (
+                followings.data.following.map((el: any) => {
+                    return (
+                        <ProfileCard user={el.following}/>
+                    )
+                })
+            )}
         </div>
     )
 };
@@ -69,8 +86,8 @@ const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getSe
     const Tab = useMemo(() => {
         switch (activeTab) {
             case 1: return <AboutTab user={user} />;
-            case 2: return <PostsTab />
-            case 3: return <FollowingTab />
+            case 2: return <PostsTab user={user} />
+            case 3: return <FollowingTab user={user} />
         }
     }, [activeTab]);
 
@@ -158,7 +175,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
             slug: context.query.slug
         },
         include: {
-            socials: true
+            socials: true,
+            following: true
         }
     });
 

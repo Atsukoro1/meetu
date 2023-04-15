@@ -1,5 +1,6 @@
 import { prisma } from "@/server/db";
-import { UpdateUserSchema } from "../schema/user";
+import { FetchFollowingSchema, UpdateUserSchema } from "../schema/user";
+import slugify from "@/utils/slugify";
 
 export const followUserResolver = async (
     { user }: any,
@@ -29,10 +30,31 @@ export const unfollowUserResolver = async (
 ): Promise<void> => {
     await prisma.userFollows.deleteMany({
         where: {
-          followerId: userId,
-          followingId: user.id,
+            followerId: userId,
+            followingId: user.id,
         },
     });
+}
+
+export const fetchFollowingResolver = async (
+    input: typeof FetchFollowingSchema._input
+): Promise<any> => {
+    const skip = (input.page as number - 1) * (input.perPage as number);
+
+    const followings = await prisma.user.findUnique({
+        where: { id: input.userId },
+        select: {
+            following: {
+                skip: skip,
+                take: input.perPage,
+                select: {
+                    following: true,
+                },
+            },
+        },
+    });
+
+    return followings;
 }
 
 export const updateUserResolver = async (
@@ -44,6 +66,7 @@ export const updateUserResolver = async (
             id: user.id
         },
         data: {
+            slug: slugify(user.name),
             ...data.gender && { gender: data.gender },
             ...data.age && { age: data.age },
             ...data.bio && { bio: data.bio },

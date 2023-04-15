@@ -39,26 +39,63 @@ enum Gender {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    slug          String?   @unique
-    email         String?   @unique
-    emailVerified DateTime?
+  id            String        @id @default(cuid())
+  name          String?
+  slug          String?       @unique
+  email         String?       @unique
+  emailVerified DateTime?
 
-    gender        Gender    @default(MALE)
-    setupDone     Boolean   @default(false)
-    hobbies       String[]  @default([])
-    age           Int?  
-    image         String?
-    banner        String?
-    bio           String?
-    socials       Social[]
+  gender        Gender        @default(MALE)
+  setupDone     Boolean       @default(false)
+  hobbies       String[]      @default([])
+  age           Int?  
+  image         String?
+  bio           String?
+  socials       Social[]
 
-    accounts      Account[]
-    sessions      Session[]
+  accounts      Account[]
+  sessions      Session[]
 
-    following     UserFollows[]  @relation("FollowsRelation")
-    followers     UserFollows[]  @relation("FollowedByRelation")
+  following     UserFollows[] @relation("FollowsRelation")
+  followers     UserFollows[] @relation("FollowedByRelation")
+
+  authoredPosts Post[]        @relation("Author")
+  likedPosts    PostLike[]    @relation("Likes")
+  dislikedPosts PostDislike[] @relation("Dislikes")
+}
+
+model Post {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  content   String
+  author    User        @relation("Author", fields: [authorId], references: [id])
+  authorId  String
+
+  likes     PostLike[]    @relation("Likes")
+  dislikes  PostDislike[] @relation("Dislikes")
+}
+
+model PostLike {
+  postId    String
+  userId    String
+  post      Post   @relation("Likes", fields: [postId], references: [id])
+  user      User   @relation("Likes", fields: [userId], references: [id])
+
+  @@id([postId, userId])
+}
+
+model PostDislike {
+  postId    String
+  userId    String
+  post      Post   @relation("Dislikes", fields: [postId], references: [id])
+  user      User   @relation("Dislikes", fields: [userId], references: [id])
+
+  @@id([postId, userId])
+}
+
+enum LikeType {
+  LIKE
+  DISLIKE
 }
 
 model UserFollows {
