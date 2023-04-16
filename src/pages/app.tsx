@@ -1,6 +1,5 @@
 import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from "next";
-import ProfileHighlight from "@/components/ProfileHighlight";
-import Post from "@/components/Post";
+import ProfileHighlight, { ExtendedUser } from "@/components/ProfileHighlight";
 import PostInput from "@/components/PostInput";
 import ProfileCard from "@/components/ProfileCard";
 import Skeleton from "@/components/Skeleton";
@@ -9,6 +8,7 @@ import { prisma } from "@/server/db";
 import { api } from "@/utils/api";
 import { User } from "@prisma/client";
 import { getServerSession } from "next-auth";
+import Post from "@/components/Post";
 
 const AppPage = ({
     recentUsers,
@@ -22,7 +22,7 @@ const AppPage = ({
     return (
         <div className="flex h-[93vh]">
             <div className="w-[30%]">
-                <ProfileHighlight user={userWithoutSensitiveData as User} />
+                <ProfileHighlight user={userWithoutSensitiveData as ExtendedUser} />
             </div>
 
             <div className="w-[45%] p-3">
@@ -40,7 +40,7 @@ const AppPage = ({
                     </div>
                 ) : (
                     <div className="flex h-[80vh] flex-col gap-3 overflow-scroll">
-                        {posts.data?.map((el) => {
+                        {posts.data?.map((el: any) => {
                             return (
                                 <Post
                                     post={el}
@@ -55,7 +55,7 @@ const AppPage = ({
             <div className="p-3 w-[25%]">
                 <h2 className="font-bold text-xl mb-2">Explore new profiles</h2>
                 <div className="flex flex-col gap-4">
-                    {recentUsers.map(el => {
+                    {recentUsers.map((el: User) => {
                         return (
                             <ProfileCard user={el} />
                         )

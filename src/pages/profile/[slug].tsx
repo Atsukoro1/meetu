@@ -7,16 +7,17 @@ import { useMemo, useState } from "react";
 import SocialBadge from "@/components/SocialBadge";
 import ProfileCard from "@/components/ProfileCard";
 import Skeleton from "@/components/Skeleton";
+import { Social } from "@prisma/client";
 
 const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
     return (
         <div>
             <label>Hobbies</label>
             <div className="mt-1.5 mb-3 flex flex-wrap max-w-[400px] gap-2">
-                {user.hobbies && user.hobbies.map(el => {
+                {user.hobbies && user.hobbies.map((el: String) => {
                     return (
                         <div
-                            key={el}
+                            key={Math.random().toString()}
                             className="badge badge-primary gap-2"
                         >
                             {el}
@@ -27,7 +28,7 @@ const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSid
 
             <label>Socials</label>
             <div className="mt-1.5 mb-3 flex flex-wrap max-w-[400px] gap-2">
-                {user.socials && user.socials.map(el => {
+                {user.socials && user.socials.map((el: Social) => {
                     return (
                         <SocialBadge key={el.id} social={el} />
                     )
