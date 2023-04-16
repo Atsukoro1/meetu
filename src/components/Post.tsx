@@ -1,27 +1,71 @@
-import { BsHandThumbsDownFill, BsHandThumbsDown, BsHandThumbsUp, BsHandThumbsUpFill } from 'react-icons/bs';
+import { FaRegThumbsDown, FaRegThumbsUp } from 'react-icons/fa';
+import { Post, User } from '@prisma/client';
+import { api } from '@/utils/api';
+import { useState } from 'react';
 
-const Post = () => {
+export type ExtendedPost = Post & {
+    author: User;
+    userLiked: boolean;
+    userDisliked: boolean;
+};
+
+const Post = ({ post }: { post: ExtendedPost }) => {
+    const toggleInteraction = api.post.toggleInteraction.useMutation();
+    const [disliked, setDisliked] = useState<boolean>(post.userDisliked);
+    const [liked, setLiked] = useState<boolean>(post.userLiked);
+
+    const changeLiked = (to: boolean) => {
+        if (disliked) setDisliked(false);
+        setLiked(to);
+    }
+
+    const changeDisliked = (to: boolean) => {
+        if (liked) setLiked(false);
+        setDisliked(to);
+    }
+
     return (
         <div className="bg-neutral p-3 rounded-lg flex flex-row">
             <div className="avatar">
                 <div className="w-14 h-14 rounded-xl">
-                    <img src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+                    <img src={post.author.image || ""} />
                 </div>
             </div>
 
             <div className="ml-3">
                 <div className="flex flex-row gap-1">
-                    <h2 className="font-semibold text-md">Name name</h2>
-                    <label>@negrneng20</label>
+                    <h2 className="font-semibold text-md">{post.author.name}</h2>
+                    <label>@{post.author.slug}</label>
                 </div>
 
                 <div>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Earum pariatur neque reiciendis minima doloribus aperiam suscipit esse laborum hic recusandae dolorem quis, accusantium iste blanditiis sunt nisi. Facilis, rem labore?
+                    {post.content}
                 </div>
 
                 <div className="flex flex-row gap-2 mt-2">
-                    <BsHandThumbsUpFill size={25}/>        
-                    <BsHandThumbsDownFill size={25}/>               
+                    <FaRegThumbsUp
+                        onClick={() => {
+                            toggleInteraction.mutateAsync({
+                                postId: post.id,
+                                type: 'LIKE'
+                            });
+                            changeLiked(liked ? false : true);
+                        }}
+                        size={25}
+                        className={`hover:cursor-pointer ${liked && "text-primary"}`}
+                    />
+
+                    <FaRegThumbsDown
+                        onClick={() => {
+                            toggleInteraction.mutateAsync({
+                                postId: post.id,
+                                type: 'DISLIKE'
+                            });
+                            changeLiked(disliked ? false : true);
+                        }}
+                        size={25}
+                        className={`hover:cursor-pointer ${disliked && "text-primary"}`}
+                    />
                 </div>
             </div>
         </div>

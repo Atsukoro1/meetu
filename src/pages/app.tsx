@@ -1,43 +1,65 @@
+import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from "next";
+import ProfileHighlight from "@/components/ProfileHighlight";
 import Post from "@/components/Post";
 import PostInput from "@/components/PostInput";
 import ProfileCard from "@/components/ProfileCard";
-import ProfileHighlight from "@/components/ProfileHighlight";
-import { NextPage } from "next";
+import Skeleton from "@/components/Skeleton";
+import { authOptions } from "@/server/auth";
+import { prisma } from "@/server/db";
+import { api } from "@/utils/api";
+import { User } from "@prisma/client";
+import { getServerSession } from "next-auth";
 
-const AppPage: NextPage = () => {
+const AppPage = ({
+    recentUsers,
+    userWithoutSensitiveData
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+    const posts = api.post.fetchPosts.useQuery({
+        page: 1,
+        perPage: 10
+    });
+
     return (
-        <div className="flex">
+        <div className="flex h-[93vh]">
             <div className="w-[30%]">
-                <ProfileHighlight/>
+                <ProfileHighlight user={userWithoutSensitiveData as User} />
             </div>
 
             <div className="w-[45%] p-3">
                 <div className="h-fit mx-auto w-full p-4">
-                    <PostInput/>
+                    <PostInput onRefresh={() => {
+                        posts.refetch();
+                    }} />
                 </div>
 
-                <div className="gap-2 flex flex-col">
-                    <Post/>
-                    <Post/>
-                    <Post/>
-                    <Post/>
-                    <Post/>
-                </div>
+                {posts.isLoading ? (
+                    <div className="gap-4 flex flex-col">
+                        <Skeleton height="120px" width="100%" />
+                        <Skeleton height="120px" width="100%" />
+                        <Skeleton height="120px" width="100%" />
+                    </div>
+                ) : (
+                    <div className="flex h-[80vh] flex-col gap-3 overflow-scroll">
+                        {posts.data?.map((el) => {
+                            return (
+                                <Post
+                                    post={el}
+                                    key={el.id}
+                                />
+                            )
+                        })}
+                    </div>
+                )}
             </div>
 
             <div className="p-3 w-[25%]">
-                <h2 className="font-bold text-xl mb-2">Well known people</h2>
+                <h2 className="font-bold text-xl mb-2">Explore new profiles</h2>
                 <div className="flex flex-col gap-4">
-                    <ProfileCard user={{ "id": "clghlyo770000vsc8kj0cini4", "name": "Atsukoro1", "slug": "atsukoro1", "email": "dornicakkuba@gmail.com", "emailVerified": null, "gender": "FEMALE", "setupDone": true, "hobbies": [], "age": 100, "image": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/pfps/clghlyo770000vsc8kj0cini4", "banner": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/banner/clghlyo770000vsc8kj0cini4", "bio": "asdfasfdsfadasfdsadf" }} />
-                    <ProfileCard user={{ "id": "clghlyo770000vsc8kj0cini4", "name": "Atsukoro1", "slug": "atsukoro1", "email": "dornicakkuba@gmail.com", "emailVerified": null, "gender": "FEMALE", "setupDone": true, "hobbies": [], "age": 100, "image": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/pfps/clghlyo770000vsc8kj0cini4", "banner": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/banner/clghlyo770000vsc8kj0cini4", "bio": "asdfasfdsfadasfdsadf" }} />
-                    <ProfileCard user={{ "id": "clghlyo770000vsc8kj0cini4", "name": "Atsukoro1", "slug": "atsukoro1", "email": "dornicakkuba@gmail.com", "emailVerified": null, "gender": "FEMALE", "setupDone": true, "hobbies": [], "age": 100, "image": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/pfps/clghlyo770000vsc8kj0cini4", "banner": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/banner/clghlyo770000vsc8kj0cini4", "bio": "asdfasfdsfadasfdsadf" }} />
-                </div>
-
-                <h2 className="font-bold text-xl mt-5 mb-2">You might know</h2>
-                <div className="flex flex-col gap-4">
-                    <ProfileCard user={{ "id": "clghlyo770000vsc8kj0cini4", "name": "Atsukoro1", "slug": "atsukoro1", "email": "dornicakkuba@gmail.com", "emailVerified": null, "gender": "FEMALE", "setupDone": true, "hobbies": [], "age": 100, "image": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/pfps/clghlyo770000vsc8kj0cini4", "banner": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/banner/clghlyo770000vsc8kj0cini4", "bio": "asdfasfdsfadasfdsadf" }} />
-                    <ProfileCard user={{ "id": "clghlyo770000vsc8kj0cini4", "name": "Atsukoro1", "slug": "atsukoro1", "email": "dornicakkuba@gmail.com", "emailVerified": null, "gender": "FEMALE", "setupDone": true, "hobbies": [], "age": 100, "image": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/pfps/clghlyo770000vsc8kj0cini4", "banner": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/banner/clghlyo770000vsc8kj0cini4", "bio": "asdfasfdsfadasfdsadf" }} />
-                    <ProfileCard user={{ "id": "clghlyo770000vsc8kj0cini4", "name": "Atsukoro1", "slug": "atsukoro1", "email": "dornicakkuba@gmail.com", "emailVerified": null, "gender": "FEMALE", "setupDone": true, "hobbies": [], "age": 100, "image": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/pfps/clghlyo770000vsc8kj0cini4", "banner": "https://suzgouwjcfrjbflbabgl.supabase.co/storage/v1/object/public/test/banner/clghlyo770000vsc8kj0cini4", "bio": "asdfasfdsfadasfdsadf" }} />
+                    {recentUsers.map(el => {
+                        return (
+                            <ProfileCard user={el} />
+                        )
+                    })}
                 </div>
             </div>
         </div>
@@ -45,3 +67,57 @@ const AppPage: NextPage = () => {
 }
 
 export default AppPage;
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+    const session = await getServerSession(context.req, context.res, authOptions);
+
+    if (!session) return {
+        redirect: {
+            destination: "/"
+        }
+    };
+
+    const recentUsers = await prisma.user.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+    });
+
+    const userWithCounts = await prisma.user.findFirst({
+        where: {
+            id: session.user.id,
+        },
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+            email: true,
+            emailVerified: true,
+            gender: true,
+            setupDone: true,
+            hobbies: true,
+            age: true,
+            image: true,
+            bio: true,
+            socials: true,
+            accounts: true,
+            sessions: true,
+            authoredPosts: { select: { id: true } },
+            following: { select: { followingId: true } },
+            followers: { select: { followerId: true } },
+        },
+    }) as any;
+
+    userWithCounts.postCount = userWithCounts.authoredPosts.length;
+    userWithCounts.followerCount = userWithCounts.followers.length;
+    userWithCounts.followingCount = userWithCounts.following.length;
+
+    const { following, followers, ...userWithoutSensitiveData } = userWithCounts;
+
+    return {
+        props: {
+            recentUsers: JSON.parse(JSON.stringify(recentUsers)),
+            userWithoutSensitiveData: JSON.parse(JSON.stringify(userWithoutSensitiveData)),
+            revalidate: 20
+        }
+    };
+}

@@ -50,6 +50,7 @@ model User {
   hobbies       String[]      @default([])
   age           Int?  
   image         String?
+  banner        String?
   bio           String?
   socials       Social[]
 
@@ -62,6 +63,8 @@ model User {
   authoredPosts Post[]        @relation("Author")
   likedPosts    PostLike[]    @relation("Likes")
   dislikedPosts PostDislike[] @relation("Dislikes")
+
+  createdAt     DateTime      @default(now())
 }
 
 model Post {
@@ -91,11 +94,6 @@ model PostDislike {
   user      User   @relation("Dislikes", fields: [userId], references: [id])
 
   @@id([postId, userId])
-}
-
-enum LikeType {
-  LIKE
-  DISLIKE
 }
 
 model UserFollows {

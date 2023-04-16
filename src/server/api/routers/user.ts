@@ -1,4 +1,4 @@
-import { fetchFollowingResolver, followUserResolver, unfollowUserResolver, updateUserResolver } from "../resolvers/user";
+import { fetchFollowingResolver, followUserResolver, meResolver, newUsersResolver, unfollowUserResolver, updateUserResolver } from "../resolvers/user";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { FetchFollowingSchema, UpdateUserSchema } from "../schema/user";
 import { z } from "zod";
@@ -26,5 +26,15 @@ export const userRouter = createTRPCRouter({
     .input(FetchFollowingSchema)
     .query(({ input }) => {
       return fetchFollowingResolver(input);
+    }),
+
+  me: protectedProcedure
+    .query(({ ctx }) => {
+      return meResolver(ctx.session);
+    }),
+
+  newUsers: protectedProcedure
+    .query(() => {
+      return newUsersResolver();
     })
 });

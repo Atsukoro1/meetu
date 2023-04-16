@@ -166,9 +166,17 @@ export default Profile;
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     const session = await getServerSession(context.req, context.res, authOptions);
 
-    if (!context.query.slug || typeof context.query.slug !== 'string' || !session) return {
-        redirect: '/404'
+    if(!session) return {
+        redirect: {
+            destination: "/"
+        }
     };
+
+    if (!context.query.slug || typeof context.query.slug !== 'string') return { 
+        redirect: { 
+            destination: "/404" 
+        } 
+    }
 
     const user = await prisma.user.findFirst({
         where: {
@@ -181,9 +189,11 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     });
 
     if (!user) {
-        return {
-            redirect: '/404'
-        }
+        return { 
+            redirect: { 
+                destination: "/" 
+            } 
+        };
     }
 
     const existingRelation = await prisma.userFollows.findUnique({
@@ -197,7 +207,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
     return {
         props: {
-            user: user,
+            user: JSON.parse(JSON.stringify(user)),
             isFollowing: !!existingRelation
         }
     }

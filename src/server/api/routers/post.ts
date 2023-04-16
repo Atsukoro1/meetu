@@ -1,17 +1,23 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createPostResolver, fetchPostsResolver, toggleInteractionResolver } from "../resolvers/post";
+import { CreatePostSchema, FetchPostsSchema, ToggleInteractionSchema } from "../schema/post";
 
 export const postRouter = createTRPCRouter({
     createPost: protectedProcedure
-        .mutation(({ ctx }) => {
+        .input(CreatePostSchema)
+        .mutation(({ ctx, input }) => {
+            return createPostResolver(ctx.session, input);
         }),
 
-    likePost: protectedProcedure
-        .mutation(({ ctx }) => {
-
+    toggleInteraction: protectedProcedure
+        .input(ToggleInteractionSchema)
+        .mutation(({ ctx, input }) => {
+            return toggleInteractionResolver(ctx.session, input);
         }),
 
-    dislikePost: protectedProcedure
-        .mutation(({ ctx }) => {
-            
+    fetchPosts: protectedProcedure
+        .input(FetchPostsSchema)
+        .query(({ ctx, input }) => {
+            return fetchPostsResolver(ctx.session, input);
         })
 });
