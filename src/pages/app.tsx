@@ -11,6 +11,7 @@ import { User } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import Post from "@/components/Post";
 import { useState } from "react";
+import Menu from "@/components/Menu";
 
 const AppPage = ({
     recentUsers,
@@ -24,16 +25,20 @@ const AppPage = ({
 
     return (
         <div className="flex h-[93vh]">
-            <div className="w-[30%]">
+            <div className="w-[30%] ml-3">
                 <ProfileHighlight user={userWithoutSensitiveData as ExtendedUser} />
+
+                <Menu/>
             </div>
 
             <div className="w-[45%] p-3">
-                <div className="h-fit mx-auto w-full p-4">
+                <div className="h-fit mx-auto w-full mt-2">
                     <PostInput onRefresh={() => {
                         posts.refetch();
                     }} />
                 </div>
+
+                <div className="divider"></div>
 
                 {posts.isLoading ? (
                     <div className="gap-4 flex flex-col">
@@ -42,7 +47,7 @@ const AppPage = ({
                         <Skeleton height="120px" width="100%" />
                     </div>
                 ) : (
-                    <div className="flex h-[70vh] flex-col gap-3 overflow-scroll">
+                    <div className="flex h-[60vh] flex-col gap-3 overflow-scroll">
                         {posts.data?.posts?.map((el: any) => {
                             return (
                                 <Post

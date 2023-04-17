@@ -9,7 +9,7 @@ import {
   ToggleInteractionSchema,
 } from "../schema/post";
 import { prisma } from "@/server/db";
-import { Post, Prisma } from "@prisma/client";
+import { Attachment, Post, Prisma } from "@prisma/client";
 import { ExtendedPost } from "@/components/Post";
 
 export const createPostResolver = async (
@@ -20,9 +20,23 @@ export const createPostResolver = async (
     data: {
       authorId: user.id,
       content: input.content,
+      ...input.attachmentId && {
+        attachmentId: input.attachmentId
+      }
     },
   });
 };
+
+export const createPostAttachmentResolver = async (
+  { user }: Session,
+  input: any
+): Promise<Attachment> => {
+  return prisma.attachment.create({
+    data: {
+      type: input.type
+    }
+  });
+}
 
 export const fetchPostsResolver = async (
   { user }: Session,
@@ -44,6 +58,7 @@ export const fetchPostsResolver = async (
       orderBy: { createdAt: "desc" },
       include: {
         author: true,
+        attachment: true,
         likes: { where: { userId: user.id ?? undefined }, take: 1 },
         dislikes: { where: { userId: user.id ?? undefined }, take: 1 },
       },

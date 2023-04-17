@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { createPostCommentResolver, createPostResolver, deletePostCommentResolver, fetchPostsResolver, getPostComments, getPostsByUserResolver, toggleInteractionResolver } from "../resolvers/post";
-import { CreatePostCommentSchema, CreatePostSchema, DeletePostCommentSchema, FetchPostsSchema, GetPostCommentsSchema, GetPostsByUserSchema, ToggleInteractionSchema } from "../schema/post";
+import { createPostAttachmentResolver, createPostCommentResolver, createPostResolver, deletePostCommentResolver, fetchPostsResolver, getPostComments, getPostsByUserResolver, toggleInteractionResolver } from "../resolvers/post";
+import { CreatePostAttachmentSchema, CreatePostCommentSchema, CreatePostSchema, DeletePostCommentSchema, FetchPostsSchema, GetPostCommentsSchema, GetPostsByUserSchema, ToggleInteractionSchema } from "../schema/post";
 
 export const postRouter = createTRPCRouter({
     createPost: protectedProcedure
@@ -43,5 +43,11 @@ export const postRouter = createTRPCRouter({
         .input(GetPostCommentsSchema)
         .query(({ ctx, input }) => {
             return getPostComments(ctx.session, input);
+        }),
+    
+    createPostAttachment: protectedProcedure
+        .input(CreatePostAttachmentSchema)
+        .mutation(({ ctx, input }) => {
+            return createPostAttachmentResolver(ctx.session, input);
         })
 });

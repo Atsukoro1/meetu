@@ -100,7 +100,6 @@ const PostModal = ({ post }: { post: ExtendedPost }) => {
                 <div className="modal-box">
                     <PostModalBlockAuthor post={post} />
 
-
                     <div className="divider"></div>
 
                     <div className='mb-4'>
@@ -121,13 +120,13 @@ const PostModal = ({ post }: { post: ExtendedPost }) => {
                         )}
                     </div>
 
-                    <Pagination
+                    {comments.data?.commentsCount !== 0 && <Pagination
                         currentPage={page}
                         totalPages={Math.round(comments.data?.commentsCount as number / 5) + 1}
                         onPageChange={(value) => {
                             setPage(value);
                         }}
-                    />
+                    />}
 
                     <div className="modal-action">
                         <label htmlFor={`post_modal_${post.id}`} className="btn">Close</label>

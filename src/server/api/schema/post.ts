@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const CreatePostSchema = z.object({
+    attachmentId: z.string().optional(),
     content: z.string().min(1).max(2048)
 });
 
@@ -33,4 +34,8 @@ export const GetPostCommentsSchema = z.object({
     postId: z.string(),
     page: z.number(),
     perPage: z.number()
+});
+
+export const CreatePostAttachmentSchema = z.object({
+    type: z.string()
 });

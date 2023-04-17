@@ -15,7 +15,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <div data-theme="night">
+      <div data-theme="halloween">
         <Navbar/>
         <Component {...pageProps} />
       </div>

@@ -33,6 +33,13 @@ model Session {
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model Attachment {
+  id              String  @id @default(cuid())
+  type            String
+
+  posts           Post[]
+}
+
 enum Gender {
     MALE
     FEMALE
@@ -99,6 +106,9 @@ model Post {
   comments  Comment[]   @relation("PostComments")
   likes     PostLike[]  @relation("Likes")
   dislikes  PostDislike[] @relation("Dislikes")
+
+  attachmentId   String?
+  attachment Attachment?    @relation(fields: [attachmentId], references: [id])
 }
 
 model Comment {
