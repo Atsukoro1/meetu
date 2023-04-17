@@ -14,7 +14,7 @@ const PostInput = ({ onRefresh }: { onRefresh: () => void; }) => {
     });
 
     return (
-        <div className="flex w-fit mx-auto flex-row gap-4">
+        <div className="flex w-full mb-4 mx-auto flex-row gap-4">
             <div className="avatar">
                 <div className="w-12 h-12 rounded-xl">
                     <img src={session.data?.user.image || ""} />

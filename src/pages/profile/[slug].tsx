@@ -8,6 +8,7 @@ import SocialBadge from "@/components/SocialBadge";
 import ProfileCard from "@/components/ProfileCard";
 import Skeleton from "@/components/Skeleton";
 import { Social } from "@prisma/client";
+import Post, { ExtendedPost } from "@/components/Post";
 
 const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
     return (
@@ -39,9 +40,30 @@ const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSid
 };
 
 const PostsTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
+    const posts = api.post.getPostsByUser.useQuery({
+        userId: user.id,
+        page: 1,
+        perPage: 10
+    });
+
     return (
         <div>
-
+            {posts.isLoading ? (
+                <div className="flex flex-col gap-2">
+                    <Skeleton height={"100px"} width={"100%"} />
+                    <Skeleton height={"100px"} width={"100%"} />
+                    <Skeleton height={"100px"} width={"100%"} />
+                    <Skeleton height={"100px"} width={"100%"} />
+                </div>
+            ) : (
+                <div className="flex flex-col gap-2">
+                    {posts.data?.map((el: ExtendedPost) => {
+                        return (
+                            <Post post={el} />
+                        )
+                    })}
+                </div>
+            )}
         </div>
     )
 };
@@ -61,7 +83,7 @@ const FollowingTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServe
             ) : (
                 followings.data.following.map((el: any) => {
                     return (
-                        <ProfileCard user={el.following}/>
+                        <ProfileCard user={el.following} />
                     )
                 })
             )}
@@ -94,7 +116,7 @@ const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getSe
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
-            <div className="card-normal bg-neutral h-fit overflow-hidden">
+            <div className="mt-5 card-normal bg-neutral h-fit overflow-hidden">
                 <div>
                     <img
                         src={user.banner as string}
@@ -167,16 +189,16 @@ export default Profile;
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     const session = await getServerSession(context.req, context.res, authOptions);
 
-    if(!session) return {
+    if (!session) return {
         redirect: {
             destination: "/"
         }
     };
 
-    if (!context.query.slug || typeof context.query.slug !== 'string') return { 
-        redirect: { 
-            destination: "/404" 
-        } 
+    if (!context.query.slug || typeof context.query.slug !== 'string') return {
+        redirect: {
+            destination: "/404"
+        }
     }
 
     const user = await prisma.user.findFirst({
@@ -190,10 +212,10 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     });
 
     if (!user) {
-        return { 
-            redirect: { 
-                destination: "/" 
-            } 
+        return {
+            redirect: {
+                destination: "/"
+            }
         };
     }
 

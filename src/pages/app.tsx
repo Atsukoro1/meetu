@@ -1,5 +1,6 @@
-import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from "next";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import ProfileHighlight, { ExtendedUser } from "@/components/ProfileHighlight";
+import Pagination from "@/components/Pagination";
 import PostInput from "@/components/PostInput";
 import ProfileCard from "@/components/ProfileCard";
 import Skeleton from "@/components/Skeleton";
@@ -9,13 +10,15 @@ import { api } from "@/utils/api";
 import { User } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import Post from "@/components/Post";
+import { useState } from "react";
 
 const AppPage = ({
     recentUsers,
     userWithoutSensitiveData
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+    const [currentPage, setCurrentPage] = useState<number>(1);
     const posts = api.post.fetchPosts.useQuery({
-        page: 1,
+        page: currentPage,
         perPage: 10
     });
 
@@ -39,8 +42,8 @@ const AppPage = ({
                         <Skeleton height="120px" width="100%" />
                     </div>
                 ) : (
-                    <div className="flex h-[80vh] flex-col gap-3 overflow-scroll">
-                        {posts.data?.map((el: any) => {
+                    <div className="flex h-[70vh] flex-col gap-3 overflow-scroll">
+                        {posts.data?.posts?.map((el: any) => {
                             return (
                                 <Post
                                     post={el}
@@ -50,6 +53,14 @@ const AppPage = ({
                         })}
                     </div>
                 )}
+
+                <div className="w-fit mx-auto mt-5">
+                    <Pagination
+                        totalPages={posts.data?.totalPages as number}
+                        currentPage={currentPage}
+                        onPageChange={(value) => setCurrentPage(value)}
+                    />
+                </div>
             </div>
 
             <div className="p-3 w-[25%]">

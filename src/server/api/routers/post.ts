@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { createPostResolver, fetchPostsResolver, toggleInteractionResolver } from "../resolvers/post";
-import { CreatePostSchema, FetchPostsSchema, ToggleInteractionSchema } from "../schema/post";
+import { createPostResolver, fetchPostsResolver, getPostsByUserResolver, toggleInteractionResolver } from "../resolvers/post";
+import { CreatePostSchema, FetchPostsSchema, GetPostsByUserSchema, ToggleInteractionSchema } from "../schema/post";
 
 export const postRouter = createTRPCRouter({
     createPost: protectedProcedure
@@ -19,5 +19,11 @@ export const postRouter = createTRPCRouter({
         .input(FetchPostsSchema)
         .query(({ ctx, input }) => {
             return fetchPostsResolver(ctx.session, input);
+        }),
+
+    getPostsByUser: protectedProcedure
+        .input(GetPostsByUserSchema)
+        .query(({ ctx, input }) => {
+            return getPostsByUserResolver(ctx.session, input);
         })
 });

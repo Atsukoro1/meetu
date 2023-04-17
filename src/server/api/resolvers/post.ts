@@ -1,7 +1,8 @@
 import { Session } from "next-auth";
-import { CreatePostSchema, FetchPostsSchema, ToggleInteractionSchema } from "../schema/post";
+import { CreatePostSchema, FetchPostsSchema, GetPostsByUserSchema, ToggleInteractionSchema } from "../schema/post";
 import { prisma } from "@/server/db";
 import { Post } from "@prisma/client";
+import { ExtendedPost } from "@/components/Post";
 
 export const createPostResolver = async (
     { user }: Session,
@@ -18,7 +19,42 @@ export const createPostResolver = async (
 export const fetchPostsResolver = async (
     { user }: Session,
     input: typeof FetchPostsSchema._input
-): Promise<Post[]> => {
+): Promise<{ posts: Post[]; totalPages: number; hasMore: boolean; hasPrevious: boolean }> => {
+    const skip = (input.page as number - 1) * (input.perPage as number);
+    const take = input.perPage;
+
+    const [count, posts] = await Promise.all([
+        prisma.post.count(),
+        prisma.post.findMany({
+            skip,
+            take,
+            orderBy: { createdAt: 'desc' },
+            include: {
+                author: true,
+                likes: { where: { userId: user.id ?? undefined }, take: 1 },
+                dislikes: { where: { userId: user.id ?? undefined }, take: 1 },
+            },
+        }),
+    ]);
+
+    const totalPages = Math.ceil(count / (input.perPage as number));
+    const hasMore = input.page as number < totalPages;
+    const hasPrevious = input.page as number > 1;
+
+    const postsWithLikesDislikes = posts.map((post) => {
+        const userLiked = !!post.likes.length;
+        const userDisliked = !!post.dislikes.length;
+        return { ...post, userLiked, userDisliked };
+    });
+
+    return { posts: postsWithLikesDislikes, totalPages, hasMore, hasPrevious };
+};
+
+
+export const getPostsByUserResolver = async (
+    { user }: Session,
+    input: typeof GetPostsByUserSchema._input
+): Promise<ExtendedPost[]> => {
     const skip = (input.page as number - 1) * (input.perPage as number);
     const take = input.perPage;
 
@@ -26,6 +62,9 @@ export const fetchPostsResolver = async (
         skip,
         take,
         orderBy: { createdAt: 'desc' },
+        where: {
+            authorId: input.userId
+        },
         include: {
             author: true,
             likes: { where: { userId: user.id ?? undefined }, take: 1 },

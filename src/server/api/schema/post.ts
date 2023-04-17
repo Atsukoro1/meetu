@@ -13,3 +13,9 @@ export const FetchPostsSchema = z.object({
     page: z.number().min(1).default(1),
     perPage: z.number().default(10)
 });
+
+export const GetPostsByUserSchema = z.object({
+    page: z.number().min(1).default(1),
+    perPage: z.number().default(10),
+    userId: z.string()
+});
