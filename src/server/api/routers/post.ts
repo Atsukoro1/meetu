@@ -1,6 +1,6 @@
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { createPostResolver, fetchPostsResolver, getPostsByUserResolver, toggleInteractionResolver } from "../resolvers/post";
-import { CreatePostSchema, FetchPostsSchema, GetPostsByUserSchema, ToggleInteractionSchema } from "../schema/post";
+import { createPostCommentResolver, createPostResolver, deletePostCommentResolver, fetchPostsResolver, getPostComments, getPostsByUserResolver, toggleInteractionResolver } from "../resolvers/post";
+import { CreatePostCommentSchema, CreatePostSchema, DeletePostCommentSchema, FetchPostsSchema, GetPostCommentsSchema, GetPostsByUserSchema, ToggleInteractionSchema } from "../schema/post";
 
 export const postRouter = createTRPCRouter({
     createPost: protectedProcedure
@@ -25,5 +25,23 @@ export const postRouter = createTRPCRouter({
         .input(GetPostsByUserSchema)
         .query(({ ctx, input }) => {
             return getPostsByUserResolver(ctx.session, input);
+        }),
+
+    createPostComment: protectedProcedure
+        .input(CreatePostCommentSchema)
+        .mutation(({ ctx, input }) => {
+            return createPostCommentResolver(ctx.session, input);
+        }),
+
+    deletePostComment: protectedProcedure
+        .input(DeletePostCommentSchema)
+        .mutation(({ ctx, input }) => {
+            return deletePostCommentResolver(ctx.session, input);
+        }),
+
+    fetchPostComments: protectedProcedure
+        .input(GetPostCommentsSchema)
+        .query(({ ctx, input }) => {
+            return getPostComments(ctx.session, input);
         })
 });

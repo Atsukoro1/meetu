@@ -64,18 +64,11 @@ model User {
   likedPosts    PostLike[]    @relation("Likes")
   dislikedPosts PostDislike[] @relation("Dislikes")
 
+  authoredComments Comment[]       @relation("Author")
+  likedComments    CommentLike[]   @relation("Likes")
+  dislikedComments CommentDislike[] @relation("Dislikes")
+
   createdAt     DateTime      @default(now())
-}
-
-model Post {
-  id        String      @id @default(cuid())
-  createdAt DateTime    @default(now())
-  content   String
-  author    User        @relation("Author", fields: [authorId], references: [id])
-  authorId  String
-
-  likes     PostLike[]    @relation("Likes")
-  dislikes  PostDislike[] @relation("Dislikes")
 }
 
 model PostLike {
@@ -95,6 +88,51 @@ model PostDislike {
 
   @@id([postId, userId])
 }
+
+model Post {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now())
+  content   String
+  author    User        @relation("Author", fields: [authorId], references: [id])
+  authorId  String
+
+  comments  Comment[]   @relation("PostComments")
+  likes     PostLike[]  @relation("Likes")
+  dislikes  PostDislike[] @relation("Dislikes")
+}
+
+model Comment {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+  content     String
+  author      User          @relation("Author", fields: [authorId], references: [id])
+  authorId    String
+
+  post        Post          @relation("PostComments", fields: [postId], references: [id])
+  postId      String
+
+  likes       CommentLike[] @relation("Likes")
+  dislikes    CommentDislike[] @relation("Dislikes")
+}
+
+model CommentDislike {
+  commentId   String
+  userId      String
+  comment     Comment @relation("Dislikes", fields: [commentId], references: [id])
+  user        User    @relation("Dislikes", fields: [userId], references: [id])
+
+  @@id([commentId, userId])
+}
+
+model CommentLike {
+  commentId String
+  userId    String
+  comment   Comment @relation("Likes", fields: [commentId], references: [id])
+  user      User   @relation("Likes", fields: [userId], references: [id])
+
+  @@id([commentId, userId])
+}
+
 
 model UserFollows {
     followerId    String

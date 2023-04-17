@@ -68,7 +68,7 @@ const PostComponent = ({ post }: { post: ExtendedPost }) => {
                         className={`hover:cursor-pointer ${disliked && 'text-primary'}`}
                     />
 
-                    <label htmlFor='my-modal'>
+                    <label htmlFor={`post_modal_${post.id}`}>
                         <BiCommentDetail
                             size={25}
                             className={`hover:cursor-pointer`}

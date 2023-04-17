@@ -19,3 +19,18 @@ export const GetPostsByUserSchema = z.object({
     perPage: z.number().default(10),
     userId: z.string()
 });
+
+export const CreatePostCommentSchema = z.object({
+    content: z.string(),
+    postId: z.string()
+});
+
+export const DeletePostCommentSchema = z.object({
+    commentId: z.string()
+});
+
+export const GetPostCommentsSchema = z.object({
+    postId: z.string(),
+    page: z.number(),
+    perPage: z.number()
+});
