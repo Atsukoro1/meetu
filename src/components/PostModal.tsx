@@ -2,7 +2,6 @@ import { IoMdSend } from 'react-icons/io';
 import { ExtendedPost } from "./Post";
 import { useState } from 'react';
 import { api } from '@/utils/api';
-import Pagination from './Pagination';
 import { Comment, Post, User } from '@prisma/client';
 import { BsArrow90DegUp } from 'react-icons/bs';
 
@@ -87,11 +86,11 @@ const PostModalBlockComment = ({ comment }: { comment: Comment & { author: User 
 
 const PostModal = ({ post }: { post: ExtendedPost }) => {
     const [page, setPage] = useState<number>(1);
-    const comments = api.post.fetchPostComments.useQuery({
-        page: page,
-        perPage: 5,
-        postId: post.id
-    });
+    // const comments = api.post.fetchPostComments.useQuery({
+    //     page: page,
+    //     perPage: 5,
+    //     postId: post.id
+    // });
 
     return (
         <div>
@@ -106,7 +105,7 @@ const PostModal = ({ post }: { post: ExtendedPost }) => {
                         <PostModalCommentInput post={post} />
                     </div>
 
-                    <div className='mb-4 flex flex-col gap-3'>
+                    {/* <div className='mb-4 flex flex-col gap-3'>
                         {(comments.isLoading || !comments.data) ? (
                             <>
                                 Loading
@@ -126,7 +125,7 @@ const PostModal = ({ post }: { post: ExtendedPost }) => {
                         onPageChange={(value) => {
                             setPage(value);
                         }}
-                    />}
+                    />} */}
 
                     <div className="modal-action">
                         <label htmlFor={`post_modal_${post.id}`} className="btn">Close</label>

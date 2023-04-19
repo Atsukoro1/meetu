@@ -41,7 +41,10 @@ const PostInput = ({ onRefresh }: { onRefresh: () => void; }) => {
                     className="btn btn-primary"
                     onClick={() => {
                         createPost.mutateAsync({
-                            content: data.content
+                            content: data.content,
+                            ...data.attachmentId && {
+                                attachmentId: data.attachmentId
+                            }
                         });
 
                         setData({
@@ -56,7 +59,6 @@ const PostInput = ({ onRefresh }: { onRefresh: () => void; }) => {
 
             <AttachmentPanel 
                 onAttachment={(url) => {
-                    alert(url);
                     setData({
                         ...data,
                         attachmentId: url

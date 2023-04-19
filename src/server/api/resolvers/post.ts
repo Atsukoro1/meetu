@@ -59,8 +59,8 @@ export const fetchPostsResolver = async (
       include: {
         author: true,
         attachment: true,
-        likes: { where: { userId: user.id ?? undefined }, take: 1 },
-        dislikes: { where: { userId: user.id ?? undefined }, take: 1 },
+        likes: { where: { userId: user.id ?? undefined } },
+        dislikes: { where: { userId: user.id ?? undefined } },
       },
     }),
   ]);
@@ -69,14 +69,21 @@ export const fetchPostsResolver = async (
   const hasMore = (input.page as number) < totalPages;
   const hasPrevious = (input.page as number) > 1;
 
-  const postsWithLikesDislikes = posts.map((post) => {
-    const userLiked = !!post.likes.length;
-    const userDisliked = !!post.dislikes.length;
-    return { ...post, userLiked, userDisliked };
-  });
+  const postsWithLikesDislikes = await Promise.all(
+    posts.map(async (post) => {
+      const [likeCount, dislikeCount] = await Promise.all([
+        prisma.postLike.count({ where: { postId: post.id } }),
+        prisma.postDislike.count({ where: { postId: post.id } }),
+      ]);
+      const userLiked = post.likes.some((like) => like.userId === user.id);
+      const userDisliked = post.dislikes.some((dislike) => dislike.userId === user.id);
+      return { ...post, userLiked, userDisliked, likeCount, dislikeCount };
+    })
+  );
 
   return { posts: postsWithLikesDislikes, totalPages, hasMore, hasPrevious };
 };
+
 
 export const getPostsByUserResolver = async (
   { user }: Session,
@@ -93,20 +100,28 @@ export const getPostsByUserResolver = async (
       authorId: input.userId,
     },
     include: {
+      attachment: true,
       author: true,
-      likes: { where: { userId: user.id ?? undefined }, take: 1 },
-      dislikes: { where: { userId: user.id ?? undefined }, take: 1 },
+      likes: { where: { userId: user.id ?? undefined } },
+      dislikes: { where: { userId: user.id ?? undefined } },
     },
   });
 
-  const postsWithLikesDislikes = posts.map((post) => {
-    const userLiked = !!post.likes.length;
-    const userDisliked = !!post.dislikes.length;
-    return { ...post, userLiked, userDisliked };
-  });
+  const postsWithLikesDislikes = await Promise.all(
+    posts.map(async (post) => {
+      const [likeCount, dislikeCount] = await Promise.all([
+        prisma.postLike.count({ where: { postId: post.id } }),
+        prisma.postDislike.count({ where: { postId: post.id } }),
+      ]);
+      const userLiked = post.likes.some((like) => like.userId === user.id);
+      const userDisliked = post.dislikes.some((dislike) => dislike.userId === user.id);
+      return { ...post, userLiked, userDisliked, likeCount, dislikeCount };
+    })
+  );
 
   return postsWithLikesDislikes;
 };
+
 
 export const toggleInteractionResolver = async (
   { user }: Session,
