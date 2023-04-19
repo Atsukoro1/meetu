@@ -20,7 +20,12 @@ const server = z.object({
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
-  GOOGLE_CLIENT_SECRET: z.string()
+  GOOGLE_CLIENT_SECRET: z.string(),
+  NEXT_PUBLIC_PUSHER_APPID: z.string(),
+  PUSHER_KEY: z.string(),
+  PUSHER_SECRET: z.string(),
+  NEXT_PUBLIC_PUSHER_CLUSTER: z.string(),
+  PUSHER_USETLS: z.string()
 });
 
 /**
@@ -30,7 +35,9 @@ const server = z.object({
 const client = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
-  NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL: z.string()
+  NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL: z.string(),
+  NEXT_PUBLIC_PUSHER_CLUSTER: z.string(),
+  NEXT_PUBLIC_PUSHER_APPID: z.string(),
 });
 
 const processEnv = {
@@ -46,7 +53,12 @@ const processEnv = {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL
+  NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL: process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL,
+  NEXT_PUBLIC_PUSHER_APPID: process.env.NEXT_PUBLIC_PUSHER_APPID,
+  PUSHER_KEY: process.env.PUSHER_KEY,
+  PUSHER_SECRET: process.env.PUSHER_SECRET,
+  NEXT_PUBLIC_PUSHER_CLUSTER: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+  PUSHER_USETLS: process.env.PUSHER_USETLS
 };
 
 // Don't touch the part below

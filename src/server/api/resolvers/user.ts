@@ -1,3 +1,4 @@
+import PusherClient from "@/utils/pusher";
 import { FetchFollowingSchema, UpdateUserSchema } from "../schema/user";
 import { prisma } from "@/server/db";
 import slugify from "@/utils/slugify";
@@ -68,6 +69,12 @@ export const followUserResolver = async (
             followingId: user.id,
         },
     });
+
+    PusherClient.trigger(
+        userId,
+        'follow',
+        user
+    );
 };
 
 export const unfollowUserResolver = async (

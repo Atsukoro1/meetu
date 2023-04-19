@@ -8,6 +8,7 @@ import 'filepond/dist/filepond.min.css'
 import "daisyui/dist/full.css";
 import "@/styles/globals.css";
 import Navbar from "@/components/Navbar";
+import NotificationListener from "@/components/NotificationListener";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -16,6 +17,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     <SessionProvider session={session}>
       <div data-theme="halloween">
+        <NotificationListener/>
         <Navbar/>
         <Component {...pageProps} />
       </div>
