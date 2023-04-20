@@ -3,10 +3,13 @@ import { AiFillPicture } from 'react-icons/ai';
 import { FilePond } from 'react-filepond';
 import { uploadFile } from '@/utils/supabase';
 import { api } from '@/utils/api';
-import { env } from '@/env.mjs';
+import { registerPlugin } from 'react-filepond';
+import FilePondImagePreviewPlugin from 'filepond-plugin-image-preview';
 
 const AttachmentPanel = ({ onAttachment }: { onAttachment: (url: string) => void; }) => {
     const createAttachment = api.post.createPostAttachment.useMutation();
+
+    registerPlugin(FilePondImagePreviewPlugin);
 
     return (
         <div className="flex flex-row gap-2">

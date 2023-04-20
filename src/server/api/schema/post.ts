@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const CreatePostSchema = z.object({
     attachmentId: z.string().optional(),
-    content: z.string().min(1).max(2048)
+    content: z.string().max(2048).optional()
 });
 
 export const ToggleInteractionSchema = z.object({
