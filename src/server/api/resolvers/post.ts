@@ -9,7 +9,7 @@ import {
   ToggleInteractionSchema,
 } from "../schema/post";
 import { prisma } from "@/server/db";
-import { Attachment, Post, Prisma } from "@prisma/client";
+import { Attachment, NotificationType, Post, Prisma } from "@prisma/client";
 import { ExtendedPost } from "@/components/Post";
 
 export const createPostResolver = async (
@@ -176,6 +176,16 @@ export const toggleInteractionResolver = async (
         },
       });
     } else if (!existingLike) {
+      prisma.notification.create({
+        data: {
+          type: NotificationType.LIKE,
+          title: "New like",
+          content: `User ${user.id} just liked your post!`,
+          image: user.image,
+          recipientId: post.authorId
+        }
+      });
+
       await prisma.postLike.create({
         data: {
           postId: post.id,
@@ -259,6 +269,18 @@ export const createPostCommentResolver = async (
         },
       },
     } as Prisma.CommentCreateInput,
+  });
+
+  const post = await prisma.post.findFirst({ where: { id: postId } });
+
+  prisma.notification.create({
+    data: {
+      type: NotificationType.COMMENT,
+      title: "New comment on your post",
+      content: `User ${user.name} just commented: "${input.content.substring(0, 20)}"`,
+      recipientId: post?.authorId || "",
+      image: user.image
+    },
   });
 
   return newComment;

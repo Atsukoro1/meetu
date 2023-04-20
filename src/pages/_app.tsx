@@ -2,13 +2,13 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { api } from "@/utils/api";
+import Navbar from "@/components/Navbar";
+import NotificationListener from "@/components/NotificationListener";
 
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import 'filepond/dist/filepond.min.css'
 import "daisyui/dist/full.css";
 import "@/styles/globals.css";
-import Navbar from "@/components/Navbar";
-import NotificationListener from "@/components/NotificationListener";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,

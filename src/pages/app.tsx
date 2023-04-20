@@ -1,13 +1,13 @@
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import ProfileHighlight, { ExtendedUser } from "@/components/ProfileHighlight";
-import Pagination from "@/components/Pagination";
+import InfiniteScroll from 'react-infinite-scroller';
 import PostInput from "@/components/PostInput";
 import ProfileCard from "@/components/ProfileCard";
 import Skeleton from "@/components/Skeleton";
 import { authOptions } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { api } from "@/utils/api";
-import { User } from "@prisma/client";
+import { Post as PostI, User } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import Post from "@/components/Post";
 import { useState } from "react";
@@ -17,10 +17,18 @@ const AppPage = ({
     recentUsers,
     userWithoutSensitiveData
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+    const notifications = api.notification.unreadNotificationCount.useQuery();
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [cachedPosts, setCachedPosts] = useState<PostI[]>([]);
     const posts = api.post.fetchPosts.useQuery({
         page: currentPage,
         perPage: 10
+    }, {
+        onSuccess: (data) => {
+            const copied = [...cachedPosts];
+            data.posts.forEach(el => copied.push(el));
+            setCachedPosts(copied);
+        }
     });
 
     return (
@@ -28,7 +36,7 @@ const AppPage = ({
             <div className="w-[30%] ml-3">
                 <ProfileHighlight user={userWithoutSensitiveData as ExtendedUser} />
 
-                <Menu/>
+                <Menu unreadCount={notifications.data} />
             </div>
 
             <div className="w-[45%] p-3">
@@ -40,15 +48,23 @@ const AppPage = ({
 
                 <div className="divider"></div>
 
-                {posts.isLoading ? (
-                    <div className="gap-4 flex flex-col">
-                        <Skeleton height="120px" width="100%" />
-                        <Skeleton height="120px" width="100%" />
-                        <Skeleton height="120px" width="100%" />
-                    </div>
-                ) : (
-                    <div className="flex h-[60vh] flex-col gap-3 overflow-scroll">
-                        {posts.data?.posts?.map((el: any) => {
+                <div className="flex h-[60vh] flex-col gap-3 overflow-scroll">
+                    <InfiniteScroll
+                        pageStart={0}
+                        loadMore={() => {
+                            setCurrentPage(currentPage + 1);
+                        }}
+                        hasMore={posts.data?.hasMore}
+                        loader={
+                            <div className="gap-4 flex flex-col">
+                                <Skeleton height="120px" width="100%" />
+                                <Skeleton height="120px" width="100%" />
+                                <Skeleton height="120px" width="100%" />
+                            </div>
+                        }
+                        useWindow={false}
+                    >
+                        {cachedPosts.map((el: any) => {
                             return (
                                 <Post
                                     post={el}
@@ -56,15 +72,8 @@ const AppPage = ({
                                 />
                             )
                         })}
-                    </div>
-                )}
+                    </InfiniteScroll>
 
-                <div className="w-fit mx-auto mt-5">
-                    <Pagination
-                        totalPages={posts.data?.totalPages as number}
-                        currentPage={currentPage}
-                        onPageChange={(value) => setCurrentPage(value)}
-                    />
                 </div>
             </div>
 

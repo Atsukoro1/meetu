@@ -75,6 +75,8 @@ model User {
   likedComments    CommentLike[]   @relation("Likes")
   dislikedComments CommentDislike[] @relation("Dislikes")
 
+  notifications     Notification[]
+
   createdAt     DateTime      @default(now())
 }
 
@@ -177,4 +179,26 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+enum NotificationType {
+  FOLLOW
+  LIKE
+  COMMENT
+}
+
+model Notification {
+  id      String      @default(uuid())
+  type    NotificationType
+  image   String?
+  title   String
+  content String
+  read    Boolean     @default(false)
+
+  recipientId   String
+  recipient     User    @relation(references: [id], fields: [recipientId])
+
+  createdAt     DateTime    @default(now())
+
+  @@id([id])
 }

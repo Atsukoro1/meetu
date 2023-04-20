@@ -2,7 +2,7 @@ import PusherClient from "@/utils/pusher";
 import { FetchFollowingSchema, UpdateUserSchema } from "../schema/user";
 import { prisma } from "@/server/db";
 import slugify from "@/utils/slugify";
-import { User } from "@prisma/client";
+import { NotificationType, User } from "@prisma/client";
 import { Session } from "next-auth";
 
 export const meResolver = async ({ user }: Session): Promise<User> => {
@@ -70,11 +70,15 @@ export const followUserResolver = async (
         },
     });
 
-    PusherClient.trigger(
-        userId,
-        'follow',
-        user
-    );
+    await prisma.notification.create({
+        data: {
+            type: NotificationType.FOLLOW,
+            title: "New follow",
+            content: `User ${user.name} just followed you!`,
+            image: user.image,
+            recipientId: userId
+        }
+    });
 };
 
 export const unfollowUserResolver = async (
