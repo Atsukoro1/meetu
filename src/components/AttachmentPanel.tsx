@@ -1,4 +1,3 @@
-import { CgSmileMouthOpen } from 'react-icons/cg';
 import { AiFillPicture } from 'react-icons/ai';
 import { FilePond } from 'react-filepond';
 import { uploadFile } from '@/utils/supabase';
@@ -13,10 +12,6 @@ const AttachmentPanel = ({ onAttachment }: { onAttachment: (url: string) => void
 
     return (
         <div className="flex flex-row gap-2">
-            <button className="btn btn-square rounded-xl bg-base-100 hover:neutral">
-                <CgSmileMouthOpen size={25} />
-            </button>
-
             <a href="#attachmentmodal">
                 <button className="btn btn-square rounded-xl bg-base-100 hover:neutral">
                     <AiFillPicture size={25} />

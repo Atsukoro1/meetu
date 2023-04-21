@@ -46,14 +46,16 @@ const PostLayout = () => {
                         }
                         useWindow={false}
                     >
-                        {cachedPosts.map((el: any) => {
-                            return (
-                                <Post
-                                    post={el}
-                                    key={el.id}
-                                />
-                            )
-                        })}
+                        <div className="flex flex-col gap-8">
+                            {cachedPosts.map((el: any) => {
+                                return (
+                                    <Post
+                                        post={el}
+                                        key={el.id}
+                                    />
+                                )
+                            })}
+                        </div>
                     </InfiniteScroll>
 
                 </div>

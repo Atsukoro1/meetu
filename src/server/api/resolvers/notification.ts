@@ -6,7 +6,18 @@ import { FetchNotificationsSchema } from "../schema/notification";
 export const fetchNotificationsResolver = async (
   { user }: Session,
   input: typeof FetchNotificationsSchema._input
-): Promise<Notification[]> => {
+): Promise<{ notifications: Notification[], hasMorePages: boolean }> => {
+  const perPage = input.perPage as number;
+  const currentPage = input.page as number;
+
+  const totalNotifications = await prisma.notification.count({
+    where: {
+      recipientId: user.id,
+    },
+  });
+
+  const totalPages = Math.ceil(totalNotifications / perPage);
+
   const notifications = await prisma.notification.findMany({
     where: {
       recipientId: user.id,
@@ -14,8 +25,8 @@ export const fetchNotificationsResolver = async (
     orderBy: {
       createdAt: "desc",
     },
-    skip: ((input.page as number) - 1) * (input.perPage as number),
-    take: input.perPage as number,
+    skip: (currentPage - 1) * perPage,
+    take: perPage,
   });
 
   const unreadNotificationIds = notifications
@@ -37,7 +48,9 @@ export const fetchNotificationsResolver = async (
     ]);
   }
 
-  return notifications;
+  const hasMorePages = currentPage < totalPages;
+
+  return { notifications, hasMorePages };
 };
 
 export const countUnreadNotifications = async (

@@ -8,6 +8,7 @@ import PostModal from './PostModal';
 import { env } from '@/env.mjs';
 import Image from 'next/image';
 import Attachment from './Attachment';
+import moment from 'moment';
 
 export type ExtendedPost = Post & {
     author: User;
@@ -57,7 +58,7 @@ const PostComponent = ({ post }: { post: ExtendedPost }) => {
     };
 
     return (
-        <div className="bg-neutral p-3 rounded-lg flex flex-row">
+        <div className="bg-neutral p-5 rounded-lg flex flex-row">
             <Link href={`/profile/${post.author.slug}`} className="avatar">
                 <div className="w-14 h-14 rounded-xl">
                     <img src={post.author.image || ''} />
@@ -68,6 +69,7 @@ const PostComponent = ({ post }: { post: ExtendedPost }) => {
                 <Link href={`/profile/${post.author.slug}`} className="flex flex-row gap-1">
                     <h2 className="font-semibold text-md">{post.author.name}</h2>
                     <label className="ml-1.5">@{post.author.slug}</label>
+                    <label className='ml-2 opacity-30'>{moment(post.createdAt).fromNow()}</label>
                 </Link>
 
                 <div className="table w-[375px]">{post.content}</div>
