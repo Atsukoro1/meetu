@@ -6,38 +6,56 @@ type ItemType = {
     name: string;
     icon: IconType;
     badge?: string;
+    action: OnClickMenuAction;
 };
+
+export enum OnClickMenuAction {
+    EXPLORE = 1,
+    MESSAGES = 2,
+    NOTIFICATIONS = 3
+}
 
 const items: ItemType[] = [
     {
         name: "Explore",
-        icon: FaHashtag
+        icon: FaHashtag,
+        action: OnClickMenuAction.EXPLORE
     },
     {
         name: "Messages",
-        icon: HiOutlineMail
+        icon: HiOutlineMail,
+        action: OnClickMenuAction.MESSAGES
     }
 ]
 
-const MenuItem = (props: { item: ItemType }) => {
+const MenuItem = (props: { item: ItemType, onClick: () => void; }) => {
     return (
-        <div className="bg-neutral p-4 rounded-lg flex flex-row gap-3 mt-2.5 hover:cursor-pointer hover:bg-base-100">
+        <div  
+            onClick={props.onClick}
+            className="bg-neutral p-4 rounded-lg flex flex-row gap-3 mt-2.5 hover:cursor-pointer hover:bg-base-100"
+        >
             <props.item.icon color="white" size={25} />
             <h3 className="font-semibold">{props.item.name}</h3>
         </div>
     )
 }
 
-const Menu = ({ unreadCount }: { unreadCount?: number }) => {
+const Menu = ({ unreadCount, onChange }: { unreadCount?: number, onChange: (value: OnClickMenuAction) => void }) => {
     return (
         <div className="flex flex-col gap-2">
             <div className="mt-3">
                 {items.map(el => {
-                    return <MenuItem key={el.name} item={el} />
+                    return <MenuItem 
+                        key={el.name} 
+                        item={el} 
+                        onClick={() => {
+                            onChange(el.action);
+                        }}
+                    />
                 })}
             </div>
 
-            <div className="bg-neutral p-4 rounded-lg flex flex-row gap-3 hover:cursor-pointer hover:bg-base-100">
+            <div onClick={() => { onChange(OnClickMenuAction.NOTIFICATIONS) }} className="bg-neutral p-4 rounded-lg flex flex-row gap-3 hover:cursor-pointer hover:bg-base-100">
                 <div className="indicator">
                     <span className="indicator-item badge bg-primary badge-primary">{unreadCount}</span>
                     <div className="grid place-items-center"><FaBell color="white" size={25} /></div>
