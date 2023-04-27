@@ -67,11 +67,11 @@ export const createMessageResolver = async (
     return newMessage;
 };
 
-export const FetchMessagesResolver = async (
+export const fetchMessagesResolver = async (
     { user }: Session,
     input: typeof FetchMessagesSchema._input
 ): Promise<Message[]> => {
-    const skip = (input.page as number - 1) * (input.perPage as number);
+  const skip = (input.page as number - 1) * (input.perPage as number);
 
   const messages = await prisma.message.findMany({
     where: {

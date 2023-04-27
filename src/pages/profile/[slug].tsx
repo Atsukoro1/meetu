@@ -135,6 +135,15 @@ const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getSe
                     >
                         {following ? "Following" : "Follow"}
                     </button>
+
+                    <button
+                        className={`btn relative top-[-60px] ${following ? "left-[175px]" : "left-[225px]"}`}
+                        onClick={() => {
+                            console.log("1");
+                        }}
+                    >
+                        Kontaktovat
+                    </button>
                 </div>
 
                 <div className="p-5">
