@@ -15,7 +15,10 @@ const NotificationLayout = () => {
     }, {
         onSuccess: (data) => {
             const copied = [...cachedNotifications];
-            data.notifications.forEach(el => copied.push(el));
+            data.notifications.forEach(el => {
+                copied.push(el);
+            });
+
             setCachedNotifications(copied);
         }
     });

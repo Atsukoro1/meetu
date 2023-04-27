@@ -2,7 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { createPostAttachmentResolver, createPostCommentResolver, createPostResolver, deletePostCommentResolver, fetchPostsResolver, getPostComments, getPostsByUserResolver, toggleInteractionResolver } from "../resolvers/post";
 import { CreatePostAttachmentSchema, CreatePostCommentSchema, CreatePostSchema, DeletePostCommentSchema, FetchPostsSchema, GetPostCommentsSchema, GetPostsByUserSchema, ToggleInteractionSchema } from "../schema/post";
 
-export const postRouter = createTRPCRouter({
+const postRouter = createTRPCRouter({
     createPost: protectedProcedure
         .input(CreatePostSchema)
         .mutation(({ ctx, input }) => {
@@ -51,3 +51,5 @@ export const postRouter = createTRPCRouter({
             return createPostAttachmentResolver(ctx.session, input);
         })
 });
+
+export default postRouter;

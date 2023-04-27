@@ -65,10 +65,6 @@ const Menu = ({ unreadCount, onChange }: { unreadCount?: number, onChange: (valu
                     Notifications
                 </h3>
             </div>
-
-            <button className="btn btn-primary w-full mt-3">
-                Create a post
-            </button>
         </div>
     )
 }

@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/
 import { FetchFollowingSchema, UpdateUserSchema } from "../schema/user";
 import { z } from "zod";
 
-export const userRouter = createTRPCRouter({
+const userRouter = createTRPCRouter({
   updateUser: protectedProcedure
     .input(UpdateUserSchema)
     .mutation(({ ctx, input }) => {
@@ -38,3 +38,5 @@ export const userRouter = createTRPCRouter({
       return newUsersResolver();
     })
 });
+
+export default userRouter;
