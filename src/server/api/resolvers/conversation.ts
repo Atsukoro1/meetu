@@ -80,6 +80,9 @@ export const fetchMessagesResolver = async (
     orderBy: {
       createdAt: 'desc',
     },
+    include: {
+      author: true
+    },
     take: input.perPage,
     skip,
   });

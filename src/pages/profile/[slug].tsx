@@ -9,6 +9,7 @@ import ProfileCard from "@/components/ProfileCard";
 import Skeleton from "@/components/Skeleton";
 import { Social } from "@prisma/client";
 import Post, { ExtendedPost } from "@/components/Post";
+import { useSession } from "next-auth/react";
 
 const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
     return (
@@ -92,8 +93,11 @@ const FollowingTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServe
 };
 
 const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+    const createConversation = api.conversation.createConversation.useMutation();
     const [following, setFollowing] = useState<boolean>(isFollowing);
+    const fetchConversation = api.conversation.fetch.useQuery();
     const [activeTab, setActiveTab] = useState<number>(1);
+    const session = useSession();
 
     const followUser = api.user.folllowUser.useMutation({
         onSuccess: () => {
@@ -136,14 +140,28 @@ const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getSe
                         {following ? "Following" : "Follow"}
                     </button>
 
-                    <button
-                        className={`btn relative top-[-60px] ${following ? "left-[175px]" : "left-[225px]"}`}
-                        onClick={() => {
-                            console.log("1");
-                        }}
-                    >
-                        Kontaktovat
-                    </button>
+                    {!fetchConversation.data?.some(el => el.userIds.includes(user.id)) ? (
+                        <button
+                            className={`btn relative top-[-60px] ${following ? "left-[175px]" : "left-[225px]"}`}
+                            onClick={() => {
+                                createConversation.mutateAsync({
+                                    userIds: [session.data?.user.id ?? "", user.id],
+                                    title: "Conversation with " + user.name
+                                });
+                            }}
+                        >
+                            Kontaktovat
+                        </button>
+                    ) : (
+                        <button
+                            className={`btn relative top-[-60px] ${following ? "left-[110px]" : "left-[165px]"}`}
+                            onClick={() => {
+                                
+                            }}
+                        >
+                            Otevřít konverzaci
+                        </button>
+                    )}
                 </div>
 
                 <div className="p-5">

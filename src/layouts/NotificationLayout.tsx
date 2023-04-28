@@ -8,7 +8,6 @@ import InfiniteScroll from "react-infinite-scroller";
 const NotificationLayout = () => {
     const [cachedNotifications, setCachedNotifications] = useState<NotificationI[]>([]);
     const [page, setPage] = useState<number>(1);
-    
     const data = api.notification.fetchNotifications.useQuery({
         page: page,
         perPage: 10
@@ -16,12 +15,17 @@ const NotificationLayout = () => {
         onSuccess: (data) => {
             const copied = [...cachedNotifications];
             data.notifications.forEach(el => {
-                copied.push(el);
-            });
+                const alreadyExists = copied.some(existingItem => existingItem.id === el.id);
 
+                if (!alreadyExists) {
+                    copied.push(el);
+                }
+            });
+    
             setCachedNotifications(copied);
         }
     });
+    
 
     return (
         <div className="w-[45%] p-3 flex h-[60vh] flex-col gap-4">

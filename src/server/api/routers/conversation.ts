@@ -22,7 +22,7 @@ const conversationRouter = createTRPCRouter({
         }),
 
     fetch: protectedProcedure
-        .mutation(({ ctx }) => {
+        .query(({ ctx }) => {
             return fetchResolver(ctx.session);
         }),
 

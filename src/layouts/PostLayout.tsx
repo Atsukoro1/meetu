@@ -15,10 +15,19 @@ const PostLayout = () => {
     }, {
         onSuccess: (data: any) => {
             const copied = [...cachedPosts];
-            data.posts.forEach((el: any) => copied.push(el));
+    
+            data.posts.forEach((el: PostI) => {
+                const alreadyExists = copied.some((existingItem: PostI) => existingItem.id === el.id);
+    
+                if (!alreadyExists) {
+                    copied.push(el);
+                }
+            });
+    
             setCachedPosts(copied);
         }
     });
+    
     
     return (
         <div className="w-[45%] p-3">
