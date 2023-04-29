@@ -1,24 +1,41 @@
-import { api } from "@/utils/api";
-import { Message, User } from "@prisma/client";
 import { AiOutlineSend } from 'react-icons/ai';
-import moment from "moment";
-import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroller";
+import Skeleton from "@/components/Skeleton";
+import Message from "@/components/Message";
+import { User } from "@prisma/client";
+import { api } from "@/utils/api";
 
 const MessageLayout = () => {
+    const [page, setPage] = useState<number>(1);
+
     const [selected, setSelected] = useState<string>("");
+    
+    useEffect(() => {
+        setCached([]);
+        setPage(1);
+    }, [selected]);
+
     const [newMessage, setNewMessage] = useState<string>("");
     const [cached, setCached] = useState<(Message & { author: User })[]>([]);
-    const session = useSession();
 
-    const createNewMessage = api.conversation.createMessage.useMutation();
-    const messages = api.conversation.fetchMesssages.useMutation({
+    const createNewMessage = api.conversation.createMessage.useMutation({
+        onSuccess: (object) => {
+            setCached([...cached, object]);
+        }
+    });
+
+    const messages = api.conversation.fetchMesssages.useQuery({
+        page: page,
+        perPage: 10,
+        conversationId: selected
+    },{
         onSuccess: (data) => {
             const copied = [...cached];
 
-            data.forEach(el => {
+            data.messages.forEach(el => {
                 // @ts-ignore
-                if (!copied.some(item => item.id === el.id)) copied.push(el);
+                if (!copied.some(item => item.id === el.id)) copied.unshift(el);
             });
 
             setCached(copied);
@@ -28,7 +45,6 @@ const MessageLayout = () => {
     const conversations = api.conversation.fetch.useQuery(undefined, {
         onSuccess: (data) => {
             setSelected(data[0]?.id ?? "");
-            messages.mutateAsync({ conversationId: selected });
         }
     });
 
@@ -57,25 +73,27 @@ const MessageLayout = () => {
                 })}
             </div>
             <div className="flex flex-col gap-2 h-[72vh] overflow-scroll p-4">
-                {cached.map(el => {
-                    return (
-                        <div className={`chat ${el.authorId === session.data?.user.id ? "chat-end" : "chat-start"}`}>
-                            <div className="chat-image avatar">
-                                <div className="w-10 rounded-full">
-                                    <img src={el.author.image || ""} />
-                                </div>
-                            </div>
-                            <div className="chat-header flex flex-row gap-2">
-                                {el.author.name}
-                                <time className="text-xs opacity-50">{moment(el.createdAt).fromNow()}</time>
-                            </div>
-                            <div className="chat-bubble">{el.content}</div>
-                            <div className="chat-footer opacity-50">
-                                Delivered
-                            </div>
-                        </div>
-                    )
-                })}
+            <InfiniteScroll
+                pageStart={1}
+                loadMore={() => {
+                    setPage(page + 1);
+                }}
+                hasMore={messages.data?.hasMore}
+                loader={
+                    <div className="gap-4 flex flex-col">
+                        <Skeleton height="120px" width="100%" />
+                        <Skeleton height="120px" width="100%" />
+                        <Skeleton height="120px" width="100%" />
+                    </div>
+                }
+                useWindow={false}
+            >
+                <div className="flex flex-col gap-3">
+                    {cached.map(el => {
+                        return <Message data={el}/>
+                    })}
+                </div>
+            </InfiniteScroll>
 
                 <div className="absolute bottom-5 flex flex-row mx-auto w-fit gap-3">
                     <input

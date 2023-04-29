@@ -5,8 +5,6 @@ import { api } from '@/utils/api';
 import { useState } from 'react';
 import Link from 'next/link';
 import PostModal from './PostModal';
-import { env } from '@/env.mjs';
-import Image from 'next/image';
 import Attachment from './Attachment';
 import moment from 'moment';
 
@@ -20,6 +18,7 @@ export type ExtendedPost = Post & {
 };
 
 const PostComponent = ({ post }: { post: ExtendedPost }) => {
+    const [commentModalOpen, setCommentModalOpen] = useState<boolean>(false);
     const toggleInteraction = api.post.toggleInteraction.useMutation();
     const [disliked, setDisliked] = useState<boolean>(post.userDisliked);
     const [liked, setLiked] = useState<boolean>(post.userLiked);
@@ -33,7 +32,7 @@ const PostComponent = ({ post }: { post: ExtendedPost }) => {
             setDislikedCount(dislikedCount - 1);
         }
 
-        if(to) {
+        if (to) {
             setLikedCount(likedCount + 1);
         } else {
             setLikedCount(likedCount - 1);
@@ -48,7 +47,7 @@ const PostComponent = ({ post }: { post: ExtendedPost }) => {
             setLikedCount(likedCount - 1);
         }
 
-        if(to) {
+        if (to) {
             setDislikedCount(dislikedCount + 1);
         } else {
             setDislikedCount(dislikedCount - 1);
@@ -109,7 +108,7 @@ const PostComponent = ({ post }: { post: ExtendedPost }) => {
                         {dislikedCount}
                     </div>
 
-                    <label htmlFor={`post_modal_${post.id}`}>
+                    <label onClick={() => setCommentModalOpen(true)}>
                         <BiCommentDetail
                             size={25}
                             className={`hover:cursor-pointer`}
@@ -118,7 +117,13 @@ const PostComponent = ({ post }: { post: ExtendedPost }) => {
                 </div>
             </div>
 
-            <PostModal post={post} />
+            {commentModalOpen && (
+                <PostModal
+                    onClose={() => setCommentModalOpen(false)}
+                    visible={commentModalOpen}
+                    post={post}
+                />
+            )}
         </div>
     )
 };

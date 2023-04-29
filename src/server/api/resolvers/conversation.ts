@@ -1,5 +1,5 @@
 import { prisma } from "@/server/db";
-import { Conversation, Message } from "@prisma/client";
+import { Conversation, Message, User } from "@prisma/client";
 import { Session } from "next-auth";
 import {
   CreateConversationSchema,
@@ -52,25 +52,28 @@ export const fetchResolver = async ({
 };
 
 export const createMessageResolver = async (
-    { user }: Session,
-    input: typeof CreateMessageSchema._input
-): Promise<Message> => {
-    const newMessage = await prisma.message.create({
-        data: {
-            content: input.content,
-            authorId: user.id,
-            conversationId: input.conversationId,
-            imageUrl: input.imageUrl, 
-        },
-    });
-    
-    return newMessage;
+  { user }: Session,
+  input: typeof CreateMessageSchema._input
+): Promise<Message & { author: User }> => {
+  const newMessage = await prisma.message.create({
+    data: {
+      content: input.content,
+      authorId: user.id,
+      conversationId: input.conversationId,
+      imageUrl: input.imageUrl,
+    },
+    include: {
+      author: true
+    }
+  });
+
+  return newMessage;
 };
 
 export const fetchMessagesResolver = async (
-    { user }: Session,
-    input: typeof FetchMessagesSchema._input
-): Promise<Message[]> => {
+  { user }: Session,
+  input: typeof FetchMessagesSchema._input
+): Promise<{ messages: (Message & { author: User })[], hasMore: boolean }> => {
   const skip = (input.page as number - 1) * (input.perPage as number);
 
   const messages = await prisma.message.findMany({
@@ -87,5 +90,14 @@ export const fetchMessagesResolver = async (
     skip,
   });
 
-  return messages;
+  // Check if there are more messages to fetch
+  const totalCount = await prisma.message.count({
+    where: {
+      conversationId: input.conversationId,
+    },
+  });
+
+  const hasMore = skip + (input.perPage as number) < totalCount;
+
+  return { messages, hasMore };
 }

@@ -1,9 +1,10 @@
 import { IoMdSend } from 'react-icons/io';
 import { ExtendedPost } from "./Post";
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { api } from '@/utils/api';
 import { Comment, Post, User } from '@prisma/client';
 import { BsArrow90DegUp } from 'react-icons/bs';
+import Pagination from './Pagination';
 
 const PostModalCommentInput = ({ post }: { post: ExtendedPost }) => {
     const createComment = api.post.createPostComment.useMutation();
@@ -84,18 +85,18 @@ const PostModalBlockComment = ({ comment }: { comment: Comment & { author: User 
     )
 }
 
-const PostModal = ({ post }: { post: ExtendedPost }) => {
+const PostModal = ({ post, visible, onClose }: { post: ExtendedPost, visible: boolean, onClose: () => void; }) => {
+    const open = useMemo(() => visible, [visible]);
     const [page, setPage] = useState<number>(1);
-    // const comments = api.post.fetchPostComments.useQuery({
-    //     page: page,
-    //     perPage: 5,
-    //     postId: post.id
-    // });
+    const comments = api.post.fetchPostComments.useQuery({
+        page: page,
+        perPage: 5,
+        postId: post.id
+    });
 
     return (
         <div>
-            <input type="checkbox" id={`post_modal_${post.id}`} className="modal-toggle" />
-            <div className="modal">
+            <div className={`modal ${open ? 'modal-open' : ""}`}>
                 <div className="modal-box">
                     <PostModalBlockAuthor post={post} />
 
@@ -105,7 +106,7 @@ const PostModal = ({ post }: { post: ExtendedPost }) => {
                         <PostModalCommentInput post={post} />
                     </div>
 
-                    {/* <div className='mb-4 flex flex-col gap-3'>
+                    <div className='mb-4 flex flex-col gap-3'>
                         {(comments.isLoading || !comments.data) ? (
                             <>
                                 Loading
@@ -125,10 +126,10 @@ const PostModal = ({ post }: { post: ExtendedPost }) => {
                         onPageChange={(value) => {
                             setPage(value);
                         }}
-                    />} */}
+                    />}
 
                     <div className="modal-action">
-                        <label htmlFor={`post_modal_${post.id}`} className="btn">Close</label>
+                        <label onClick={onClose} className="btn">Close</label>
                     </div>
                 </div>
             </div>
