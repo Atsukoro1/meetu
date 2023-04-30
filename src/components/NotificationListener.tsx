@@ -1,29 +1,18 @@
-import { env } from "@/env.mjs";
-import { User } from "next-auth";
+import { NotificationReceiverAtom } from "@/atoms/NotificationPoolAtom";
+import { useAtom } from "jotai";
 import { useSession } from "next-auth/react";
-import Pusher from "pusher-js";
 import { useEffect } from "react";
 
-const PusherClient = new Pusher("e7cda9512707871ade67", {
-    cluster: env.NEXT_PUBLIC_PUSHER_CLUSTER
-});
-
 const NotificationListener = () => {
-    const { data } = useSession();
+    const [_, setNotifications] = useAtom(NotificationReceiverAtom);
 
-    useEffect(() => {
-        if (!data) return;
+    const session = useSession();
 
-        PusherClient.connect();
-
-        const channel = PusherClient.subscribe((data as any).user.id);
-
-        channel.bind("follow", (data: User) => {
-            alert("Follow");
-        });
-    }, []);
+    useEffect(() => setNotifications(
+        session.data?.user.id || ""
+    ), [session.data?.user.id, setNotifications]);
 
     return <></>
-};
+}
 
 export default NotificationListener;

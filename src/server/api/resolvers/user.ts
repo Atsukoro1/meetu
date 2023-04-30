@@ -70,6 +70,12 @@ export const followUserResolver = async (
         },
     });
 
+    PusherClient.trigger(
+        userId, 
+        NotificationType.FOLLOW, 
+        user
+    );
+
     await prisma.notification.create({
         data: {
             type: NotificationType.FOLLOW,

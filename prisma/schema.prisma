@@ -187,6 +187,7 @@ model VerificationToken {
 enum NotificationType {
   FOLLOW
   LIKE
+  MESSAGE
   COMMENT
 }
 

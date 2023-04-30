@@ -3,21 +3,24 @@ import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 import Skeleton from "@/components/Skeleton";
 import Message from "@/components/Message";
-import { User } from "@prisma/client";
+import { NotificationType, User, Message as MessageType } from "@prisma/client";
 import { api } from "@/utils/api";
+import { useAtom } from 'jotai';
+import { NotificationPoolAtom } from '@/atoms/NotificationPoolAtom';
 
 const MessageLayout = () => {
     const [page, setPage] = useState<number>(1);
+    const [notifications, setNotifications] = useAtom(NotificationPoolAtom);
 
     const [selected, setSelected] = useState<string>("");
-    
+
     useEffect(() => {
         setCached([]);
         setPage(1);
     }, [selected]);
 
     const [newMessage, setNewMessage] = useState<string>("");
-    const [cached, setCached] = useState<(Message & { author: User })[]>([]);
+    const [cached, setCached] = useState<(MessageType & { author: User })[]>([]);
 
     const createNewMessage = api.conversation.createMessage.useMutation({
         onSuccess: (object) => {
@@ -29,7 +32,7 @@ const MessageLayout = () => {
         page: page,
         perPage: 10,
         conversationId: selected
-    },{
+    }, {
         onSuccess: (data) => {
             const copied = [...cached];
 
@@ -48,6 +51,24 @@ const MessageLayout = () => {
         }
     });
 
+    useEffect(() => {
+        notifications.forEach(notification => {
+            if (notification.type === NotificationType.MESSAGE) {
+                const message = notification.data as MessageType;
+                if (message.conversationId === selected) {
+                    const copied = [...cached];
+                    let index = copied.findIndex(msg => msg.createdAt > message.createdAt);
+                    if (index === -1) index = copied.length;
+                    // @ts-ignore
+                    copied.splice(index, 0, { ...message, author: message.author });
+                    setCached(copied);
+
+                    setNotifications(notifications.filter(n => n !== notification));
+                }
+            }
+        });
+    }, [notifications, selected, cached, setNotifications]);
+
     const handleNewMessage = () => {
         createNewMessage.mutateAsync({
             content: newMessage,
@@ -60,7 +81,7 @@ const MessageLayout = () => {
 
     return (
         <div className="w-[45%] p-3 d-flex flex-column justify-content-between">
-            <div className="tabs tabs-boxed">
+            <div className="tabs tabs-boxed flex flex-row">
                 {conversations.data?.map(el => {
                     return (
                         <a
@@ -73,27 +94,28 @@ const MessageLayout = () => {
                 })}
             </div>
             <div className="flex flex-col gap-2 h-[72vh] overflow-scroll p-4">
-            <InfiniteScroll
-                pageStart={1}
-                loadMore={() => {
-                    setPage(page + 1);
-                }}
-                hasMore={messages.data?.hasMore}
-                loader={
-                    <div className="gap-4 flex flex-col">
-                        <Skeleton height="120px" width="100%" />
-                        <Skeleton height="120px" width="100%" />
-                        <Skeleton height="120px" width="100%" />
+                <InfiniteScroll
+                    pageStart={1}
+                    loadMore={() => {
+                        setPage(page +
+                            1);
+                    }}
+                    hasMore={messages.data?.hasMore}
+                    loader={
+                        <div className="gap-4 flex flex-col">
+                            <Skeleton height="120px" width="100%" />
+                            <Skeleton height="120px" width="100%" />
+                            <Skeleton height="120px" width="100%" />
+                        </div>
+                    }
+                    useWindow={false}
+                >
+                    <div className="flex flex-col gap-3">
+                        {cached.map(el => {
+                            return <Message data={el} />
+                        })}
                     </div>
-                }
-                useWindow={false}
-            >
-                <div className="flex flex-col gap-3">
-                    {cached.map(el => {
-                        return <Message data={el}/>
-                    })}
-                </div>
-            </InfiniteScroll>
+                </InfiniteScroll>
 
                 <div className="absolute bottom-5 flex flex-row mx-auto w-fit gap-3">
                     <input
@@ -106,12 +128,13 @@ const MessageLayout = () => {
                     <button onClick={handleNewMessage} className="btn btn-primary">
                         Send
 
-                        <AiOutlineSend color="black" size={20} className="ml-3"/>
+                        <AiOutlineSend color="black" size={20} className="ml-3" />
                     </button>
                 </div>
             </div>
         </div>
     );
-};
+
+}
 
 export default MessageLayout;

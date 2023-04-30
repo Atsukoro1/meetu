@@ -1,5 +1,5 @@
 import { prisma } from "@/server/db";
-import { Conversation, Message, User } from "@prisma/client";
+import { Conversation, Message, NotificationType, User } from "@prisma/client";
 import { Session } from "next-auth";
 import {
   CreateConversationSchema,
@@ -7,6 +7,7 @@ import {
   DeleteConversationSchema,
   FetchMessagesSchema,
 } from "../schema/conversation";
+import PusherClient from "@/utils/pusher";
 
 export const createConversationResolver = async (
   input: typeof CreateConversationSchema._input
@@ -36,12 +37,15 @@ export const deleteConversationResolver = async (
 
 export const fetchResolver = async ({
   user,
-}: Session): Promise<Conversation[]> => {
+}: Session): Promise<(Conversation & { users: User[] })[]> => {
   const conversations = await prisma.conversation.findMany({
     where: {
       userIds: {
         has: user.id,
       },
+    },
+    include: {
+      users: true
     },
     orderBy: {
       createdAt: "desc",
@@ -63,9 +67,16 @@ export const createMessageResolver = async (
       imageUrl: input.imageUrl,
     },
     include: {
-      author: true
+      author: true,
+      conversation: true
     }
   });
+
+  PusherClient.trigger(
+    newMessage.conversation.userIds.find(el => el !== user.id) || "", 
+    NotificationType.MESSAGE, 
+    newMessage
+  );
 
   return newMessage;
 };
@@ -90,7 +101,28 @@ export const fetchMessagesResolver = async (
     skip,
   });
 
-  // Check if there are more messages to fetch
+  const unseenMessageIds = messages
+    .filter(message => !message.seen && message.authorId !== user.id)
+    .map(message => message.id);
+
+  if (unseenMessageIds.length > 0) {
+    await prisma.message.updateMany({
+      where: {
+        id: {
+          in: unseenMessageIds,
+        },
+      },
+      data: {
+        seen: true,
+      },
+    });
+  }
+
+  const updatedMessages = messages.map(message => ({
+    ...message,
+    seen: message.authorId === user.id ? message.seen : true,
+  }));
+
   const totalCount = await prisma.message.count({
     where: {
       conversationId: input.conversationId,
@@ -99,5 +131,5 @@ export const fetchMessagesResolver = async (
 
   const hasMore = skip + (input.perPage as number) < totalCount;
 
-  return { messages, hasMore };
+  return { messages: updatedMessages, hasMore };
 }

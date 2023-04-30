@@ -4,9 +4,10 @@ import { useSession } from "next-auth/react";
 
 const Message = ({ data }: { data: Message & { author: User } }) => {
     const session = useSession();
+    const isAuthor = data.authorId === session.data?.user.id;
 
     return (
-        <div className={`chat ${data.authorId === session.data?.user.id ? "chat-end" : "chat-start"}`}>
+        <div className={`chat ${isAuthor ? "chat-end" : "chat-start"}`}>
             <div className="chat-image avatar">
                 <div className="w-10 rounded-full">
                     <img src={data.author.image || ""} />
@@ -16,9 +17,11 @@ const Message = ({ data }: { data: Message & { author: User } }) => {
                 {data.author.name}
                 <time className="text-xs opacity-50">{moment(data.createdAt).fromNow()}</time>
             </div>
-            <div className="chat-bubble">{data.content}</div>
+            <div className={`chat-bubble ${isAuthor && "bg-primary bg-opacity-50"}`}>{data.content}</div>
             <div className="chat-footer opacity-50">
-                Delivered
+                {(isAuthor && data.seen) && (
+                    <label>Seen</label>
+                )}
             </div>
         </div>
     )
