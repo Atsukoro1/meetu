@@ -4,7 +4,7 @@ import ProfileCard from "@/components/ProfileCard";
 import { authOptions } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { api } from "@/utils/api";
-import { Post as PostI, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import Menu, { OnClickMenuAction } from "@/components/Menu";
 import PostLayout from "@/layouts/PostLayout";
@@ -39,7 +39,7 @@ const AppPage = ({
                 <div className="flex flex-col gap-4">
                     {recentUsers.map((el: User) => {
                         return (
-                            <ProfileCard user={el} />
+                            <ProfileCard key={el.id} user={el} />
                         )
                     })}
                 </div>

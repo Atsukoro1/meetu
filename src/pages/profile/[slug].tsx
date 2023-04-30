@@ -75,7 +75,7 @@ const FollowingTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServe
     });
 
     return (
-        <div className="gap-3">
+        <div className="gap-3 flex flex-col">
             {followings.isLoading ? (
                 <Skeleton
                     width={"100%"}
@@ -124,23 +124,25 @@ const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getSe
                 <div>
                     <img
                         src={user.banner as string}
-                        className="rounded-xl h-[195px] w-[550px] object-cover"
+                        className="rounded-xl h-[195px] w-[550px] object-cover opacity-20"
                     />
 
-                    <button
-                        className={`btn relative top-[-60px] ${following ? "left-[420px]" : "left-[450px]"}`}
-                        onClick={() => {
-                            if (following) {
-                                unfollowUser.mutateAsync(user.id);
-                            } else {
-                                followUser.mutateAsync(user.id);
-                            }
-                        }}
-                    >
-                        {following ? "Following" : "Follow"}
-                    </button>
+                    {session.data?.user.id !== user.id && (
+                        <button
+                            className={`btn relative top-[-60px] ${following ? "left-[420px]" : "left-[450px]"}`}
+                            onClick={() => {
+                                if (following) {
+                                    unfollowUser.mutateAsync(user.id);
+                                } else {
+                                    followUser.mutateAsync(user.id);
+                                }
+                            }}
+                        >
+                            {following ? "Following" : "Follow"}
+                        </button>
+                    )}
 
-                    {!fetchConversation.data?.some(el => el.userIds.includes(user.id)) ? (
+                    {(!fetchConversation.data?.some(el => el.userIds.includes(user.id)) && session.data?.user.id !== user.id) && (
                         <button
                             className={`btn relative top-[-60px] ${following ? "left-[175px]" : "left-[225px]"}`}
                             onClick={() => {
@@ -151,15 +153,6 @@ const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getSe
                             }}
                         >
                             Kontaktovat
-                        </button>
-                    ) : (
-                        <button
-                            className={`btn relative top-[-60px] ${following ? "left-[110px]" : "left-[165px]"}`}
-                            onClick={() => {
-                                
-                            }}
-                        >
-                            Otevřít konverzaci
                         </button>
                     )}
                 </div>
