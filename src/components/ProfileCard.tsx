@@ -22,7 +22,7 @@ const ProfileCard = ({ user }: { user: User }) => {
 
             <div>
                 <h3 className="font-semibold">{user.name}</h3>
-                <label className="text-sm">{user.bio?.substring(1, 40)}...</label>
+                <label className="text-sm">{user.bio?.substring(0, 70)}...</label>
             </div>
             </div>
         </Link>

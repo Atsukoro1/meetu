@@ -2,6 +2,8 @@ import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import AttachmentPanel from "./AttachmentPanel";
+import Image from "next/image";
+import { env } from "@/env.mjs";
 
 const PostInput = ({ onRefresh }: { onRefresh: () => void; }) => {
     const createPost = api.post.createPost.useMutation({
@@ -56,6 +58,16 @@ const PostInput = ({ onRefresh }: { onRefresh: () => void; }) => {
                     Publish
                 </button>
             </div>
+
+            {data.attachmentId && (
+                <Image
+                    src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${data.attachmentId}`}
+                    height={150}
+                    alt="upload"
+                    className="rounded-lg"
+                    width={150}
+                />
+            )}
 
             <AttachmentPanel 
                 onAttachment={(url) => {

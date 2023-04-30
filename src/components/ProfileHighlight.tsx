@@ -12,13 +12,7 @@ const ProfileHighlight = ({ user }: { user: ExtendedUser }) => {
         <div className="w-full rounded-xl bg-neutral p-3 mt-4">
             <img
                 src={user.image || ""}
-                className="w-full h-[130px] object-cover rounded-lg"
-                alt="banner"
-            />
-
-            <img
-                src={user.image || ""}
-                className="w-[90px] h-[90px] mt-[-65px] mx-auto  object-cover rounded-lg"
+                className="w-[90px] h-[90px] mx-auto  object-cover rounded-full"
                 alt="banner"
             />
 
