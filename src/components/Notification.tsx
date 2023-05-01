@@ -1,13 +1,14 @@
 import { Notification } from "@prisma/client";
 import { RxDotFilled } from 'react-icons/rx';
 import moment from "moment";
+import Image from "next/image";
 
 const Notification = ({ data }: { data: Notification }) => {
     return (
         <div className="flex flex-row bg-neutral p-3 rounded-lg">
             <div className="avatar">
-                <div className="w-20 rounded-full">
-                    <img className="h-[30px] w-[30px]" src={data.image || ""} />
+                <div className="w-14 h-14 rounded-full">
+                    <Image width={20} height={20} className="h-[20px] w-[20px]" alt={`pfp_${data.id}`} src={data.image || ""} />
                 </div>
             </div>
 

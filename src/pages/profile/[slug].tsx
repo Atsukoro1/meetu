@@ -158,7 +158,7 @@ const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getSe
                 </div>
 
                 <div className="p-5">
-                    <div className="flex flex-row mt-[-50px]">
+                    <div className="flex flex-row">
                         <div className="avatar online mt-[-70px]">
                             <div className="w-24 rounded-xl">
                                 <img src={user.image as string} />

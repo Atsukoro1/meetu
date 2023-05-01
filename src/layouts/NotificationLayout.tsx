@@ -10,7 +10,7 @@ const NotificationLayout = () => {
     const [page, setPage] = useState<number>(1);
     const data = api.notification.fetchNotifications.useQuery({
         page: page,
-        perPage: 10
+        perPage: 5
     }, {
         onSuccess: (data) => {
             const copied = [...cachedNotifications];
@@ -28,7 +28,7 @@ const NotificationLayout = () => {
     
 
     return (
-        <div className="w-[45%] p-3 flex h-[60vh] flex-col gap-4">
+        <div className="w-[45%] p-3 flex h-[90vh] overflow-scroll flex-col gap-4">
             <InfiniteScroll
                 pageStart={1}
                 loadMore={() => {
