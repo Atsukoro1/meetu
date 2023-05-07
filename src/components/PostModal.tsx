@@ -6,8 +6,16 @@ import { Comment, Post, User } from '@prisma/client';
 import { BsArrow90DegUp } from 'react-icons/bs';
 import Pagination from './Pagination';
 
-const PostModalCommentInput = ({ post }: { post: ExtendedPost }) => {
-    const createComment = api.post.createPostComment.useMutation();
+type PostModalCommentInputPropsI = {
+    post: ExtendedPost;
+    onCreatePost: (value: Comment) => void;
+}
+
+const PostModalCommentInput = ({ post, onCreatePost }: PostModalCommentInputPropsI) => {
+    const createComment = api.post.createPostComment.useMutation({
+        onSuccess: (data) => { onCreatePost(data) }
+    });
+
     const [content, setContent] = useState<string>("");
 
     return (
@@ -103,7 +111,10 @@ const PostModal = ({ post, visible, onClose }: { post: ExtendedPost, visible: bo
                     <div className="divider"></div>
 
                     <div className='mb-4'>
-                        <PostModalCommentInput post={post} />
+                        <PostModalCommentInput 
+                            onCreatePost={() => { comments.refetch(); }}
+                            post={post} 
+                        />
                     </div>
 
                     <div className='mb-4 flex flex-col gap-3'>

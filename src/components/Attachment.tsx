@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { env } from "@/env.mjs";
 import { Attachment } from "@prisma/client";
 import Skeleton from "./Skeleton";
+import Image from "next/image";
 
 const AttachmentComponent = ({ data }: { data: Attachment | null }) => {
     const [loading, setLoading] = useState(true);
@@ -25,7 +26,7 @@ const AttachmentComponent = ({ data }: { data: Attachment | null }) => {
                         {(loading && data.type.startsWith("image")) && <Skeleton width="500px" height="500px" />}
 
                         {data.type.startsWith("image") ? (
-                            <img
+                            <Image
                                 src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${data?.id}`}
                                 width={500}
                                 height={500}
@@ -48,7 +49,6 @@ const AttachmentComponent = ({ data }: { data: Attachment | null }) => {
                     </div>
                 </div>
 
-                <label htmlFor={`attachment_${data.id}`}>
                     {(loading && data.type.startsWith("image")) && <Skeleton width="200px" height="200px" />}
 
                     {data.type.startsWith('video') ? (
@@ -59,17 +59,18 @@ const AttachmentComponent = ({ data }: { data: Attachment | null }) => {
                             height={300}
                         />
                     ) : (
-                        <img
-                            className="mt-4 mb-4 hover:cursor-pointer hover:opacity-70"
-                            src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${data?.id}`}
-                            width={200}
-                            height={200}
-                            alt="Attachment of the post"
-                            onLoad={handleImageLoad}
-                            style={{ display: loading ? 'none' : 'block' }}
-                        />
+                        <label htmlFor={`attachment_${data.id}`}>
+                            <Image
+                                className="mt-4 mb-4 hover:cursor-pointer hover:opacity-70"
+                                src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${data?.id}`}
+                                width={200}
+                                height={200}
+                                alt="Attachment of the post"
+                                onLoad={handleImageLoad}
+                                style={{ display: loading ? 'none' : 'block' }}
+                            />
+                        </label>
                     )}
-                </label>
             </div>
         )
     } else {

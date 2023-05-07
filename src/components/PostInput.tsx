@@ -1,10 +1,10 @@
 import { api } from "@/utils/api";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AttachmentPanel from "./AttachmentPanel";
 import Image from "next/image";
 import { env } from "@/env.mjs";
-import { Attachment, Post } from "@prisma/client";
+import { Attachment } from "@prisma/client";
 import { ExtendedPost } from "./Post";
 
 const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) => {
@@ -20,8 +20,15 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
 
     const [data, setData] = useState<{ content: string, attachmentId: string }>({
         content: "",
-        attachmentId: newAttachment?.id ?? ""
+        attachmentId: ""
     });
+
+    useEffect(() => {
+        setData({
+            ...data,
+            attachmentId: newAttachment?.id ?? ""
+        })
+    }, [newAttachment]);
 
     return (
         <div className="bg-neutral p-4 rounded-lg">

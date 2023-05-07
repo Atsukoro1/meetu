@@ -13,6 +13,9 @@ dependencies:
   '@tanstack/react-query':
     specifier: ^4.28.0
     version: 4.28.0(react-dom@18.2.0)(react@18.2.0)
+  '@trpc-limiter/memory':
+    specifier: ^0.0.3
+    version: 0.0.3(@trpc/client@10.18.0)(@trpc/server@10.18.0)
   '@trpc/client':
     specifier: ^10.18.0
     version: 10.18.0(@trpc/server@10.18.0)
@@ -34,6 +37,9 @@ dependencies:
   filepond-plugin-image-preview:
     specifier: ^4.6.11
     version: 4.6.11(filepond@4.30.4)
+  jotai:
+    specifier: ^2.1.0
+    version: 2.1.0(react@18.2.0)
   moment:
     specifier: ^2.29.4
     version: 2.29.4
@@ -496,6 +502,29 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       use-sync-external-store: 1.2.0(react@18.2.0)
+    dev: false
+
+  /@trpc-limiter/core@0.0.8(@trpc/client@10.18.0)(@trpc/server@10.18.0):
+    resolution: {integrity: sha512-ptwRvjmCHIUow4mVh6O5JpDMVcDLMn+k1tpaB55ZLO/2YGFo705gN1KMM4tBWZNzp07hMyGZS7PXzn0MUxbxSQ==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@trpc/client': ^10.0.0-proxy-beta.21
+      '@trpc/server': ^10.0.0-proxy-beta.21
+    dependencies:
+      '@trpc/client': 10.18.0(@trpc/server@10.18.0)
+      '@trpc/server': 10.18.0
+    dev: false
+
+  /@trpc-limiter/memory@0.0.3(@trpc/client@10.18.0)(@trpc/server@10.18.0):
+    resolution: {integrity: sha512-D0w81ofA6xF7Jd7mCLciZj47fJilhSUl1UKzqfGKkCq6NsxukCCkR3tOZ0OqgsmWIepo5WVt4FbtGknfjcnjLA==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@trpc/client': ^10.0.0-proxy-beta.21
+      '@trpc/server': ^10.0.0-proxy-beta.21
+    dependencies:
+      '@trpc-limiter/core': 0.0.8(@trpc/client@10.18.0)(@trpc/server@10.18.0)
+      '@trpc/client': 10.18.0(@trpc/server@10.18.0)
+      '@trpc/server': 10.18.0
     dev: false
 
   /@trpc/client@10.18.0(@trpc/server@10.18.0):
@@ -2163,6 +2192,18 @@ packages:
 
   /jose@4.13.2:
     resolution: {integrity: sha512-GMUKtV+l05F6NY/06nM7rucHM6Ktvw6sxnyRqINBNWS/hCM/bBk7kanOEckRP8xtC/jzuGfTRVZvkjjuy+g4dA==}
+    dev: false
+
+  /jotai@2.1.0(react@18.2.0):
+    resolution: {integrity: sha512-fR82PtHAmEQrc/daMEYGc4EteW96/b6wodtDSCzLvoJA/6y4YG70er4hh2f8CYwYjqwQ0eZUModGfG4DmwkTyQ==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+    dependencies:
+      react: 18.2.0
     dev: false
 
   /js-sdsl@4.4.0:

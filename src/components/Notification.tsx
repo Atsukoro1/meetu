@@ -8,7 +8,12 @@ const Notification = ({ data }: { data: Notification }) => {
         <div className="flex flex-row bg-neutral p-3 rounded-lg">
             <div className="avatar">
                 <div className="w-14 h-14 rounded-full">
-                    <Image width={20} height={20} className="h-[20px] w-[20px]" alt={`pfp_${data.id}`} src={data.image || ""} />
+                    <Image 
+                        width={50} 
+                        height={50} 
+                        alt={`pfp_${data.id}`} 
+                        src={data.image || ""} 
+                    />
                 </div>
             </div>
 
