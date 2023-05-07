@@ -116,21 +116,21 @@ const MessageLayout = () => {
                         })}
                     </div>
                 </InfiniteScroll>
+            </div>
 
-                <div className="absolute bottom-5 flex flex-row mx-auto w-fit gap-3">
-                    <input
-                        className="input input-bordered w-full"
-                        placeholder="Say hi!"
-                        value={newMessage}
-                        onChange={(event) => setNewMessage(event.target.value)}
-                    />
+            <div className="mt-4 flex flex-row mx-auto w-fit gap-3">
+                <input
+                    className="input input-bordered w-full"
+                    placeholder="Say hi!"
+                    value={newMessage}
+                    onChange={(event) => setNewMessage(event.target.value)}
+                />
 
-                    <button onClick={handleNewMessage} className="btn btn-primary">
-                        Send
+                <button onClick={handleNewMessage} className="btn btn-primary">
+                    Send
 
-                        <AiOutlineSend color="black" size={20} className="ml-3" />
-                    </button>
-                </div>
+                    <AiOutlineSend color="white" size={20} className="ml-3" />
+                </button>
             </div>
         </div>
     );

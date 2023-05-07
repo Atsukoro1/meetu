@@ -59,6 +59,7 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
                             ...data,
                             content: ""
                         });
+                        
                         setNewAttachment(null);
                     }}
                 >
