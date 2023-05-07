@@ -59,7 +59,7 @@ const PostInput = ({ onRefresh }: { onRefresh: () => void; }) => {
                 </button>
             </div>
 
-            {data.attachmentId && (
+            {/* {data.attachmentId && (
                 <Image
                     src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${data.attachmentId}`}
                     height={150}
@@ -67,7 +67,7 @@ const PostInput = ({ onRefresh }: { onRefresh: () => void; }) => {
                     className="rounded-lg"
                     width={150}
                 />
-            )}
+            )} */}
 
             <AttachmentPanel 
                 onAttachment={(url) => {
