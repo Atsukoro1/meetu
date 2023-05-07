@@ -5,8 +5,9 @@ import { api } from '@/utils/api';
 import { registerPlugin } from 'react-filepond';
 import FilePondImagePreviewPlugin from 'filepond-plugin-image-preview';
 import { useState } from 'react';
+import { Attachment } from '@prisma/client';
 
-const AttachmentPanel = ({ onAttachment }: { onAttachment: (file: string) => void; }) => {
+const AttachmentPanel = ({ onAttachment }: { onAttachment: (attachment: Attachment) => void; }) => {
     const createAttachment = api.post.createPostAttachment.useMutation();
     const [modalOpen, setModalOpen] = useState<boolean>(false);
 
@@ -42,7 +43,7 @@ const AttachmentPanel = ({ onAttachment }: { onAttachment: (file: string) => voi
                                 }),
                                 "test"
                             )) {
-                                onAttachment(result.id);
+                                onAttachment(result);
                                 setModalOpen(false);
                             };
                         }}

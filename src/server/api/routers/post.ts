@@ -47,8 +47,8 @@ const postRouter = createTRPCRouter({
     
     createPostAttachment: protectedProcedure
         .input(CreatePostAttachmentSchema)
-        .mutation(({ ctx, input }) => {
-            return createPostAttachmentResolver(ctx.session, input);
+        .mutation(({ input }) => {
+            return createPostAttachmentResolver(input);
         })
 });
 

@@ -1,4 +1,4 @@
-import Post from "@/components/Post";
+import Post, { ExtendedPost } from "@/components/Post";
 import PostInput from "@/components/PostInput";
 import Skeleton from "@/components/Skeleton";
 import { useState } from "react";
@@ -27,14 +27,18 @@ const PostLayout = () => {
             setCachedPosts(copied);
         }
     });
-    
+
+    const onNewPost = (data: ExtendedPost) => {
+        const copied = [...cachedPosts];
+
+        copied.unshift(data);
+        setCachedPosts(copied);
+    };
     
     return (
         <div className="w-[45%] p-3">
                 <div className="h-fit mx-auto w-full mt-2">
-                    <PostInput onRefresh={() => {
-                        posts.refetch();
-                    }} />
+                    <PostInput onCreate={(data) => onNewPost(data)} />
                 </div>
 
                 <div className="divider"></div>

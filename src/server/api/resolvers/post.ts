@@ -15,20 +15,38 @@ import { ExtendedPost } from "@/components/Post";
 export const createPostResolver = async (
   { user }: Session,
   input: typeof CreatePostSchema._input
-): Promise<Post> => {
-  return await prisma.post.create({
+): Promise<ExtendedPost> => {
+  const createdPost = await prisma.post.create({
     data: {
       authorId: user.id,
       content: input.content,
       ...input.attachmentId && {
-        attachmentId: input.attachmentId
-      }
+        attachmentId: input.attachmentId,
+      },
+    },
+    include: {
+      author: true,
+      attachment: true,
+      likes: { where: { userId: user.id ?? undefined } },
+      dislikes: { where: { userId: user.id ?? undefined } },
     },
   });
+
+  const [likeCount, dislikeCount] = [0, 0];
+
+  const userLiked = createdPost.likes.some((like) => like.userId === user.id);
+  const userDisliked = createdPost.dislikes.some((dislike) => dislike.userId === user.id);
+
+  return {
+    ...createdPost,
+    userLiked,
+    userDisliked,
+    likeCount,
+    dislikeCount,
+  };
 };
 
 export const createPostAttachmentResolver = async (
-  { user }: Session,
   input: any
 ): Promise<Attachment> => {
   return prisma.attachment.create({
@@ -65,25 +83,39 @@ export const fetchPostsResolver = async (
     }),
   ]);
 
+  const postIds = posts.map((post) => post.id);
+
+  const [likesCount, dislikesCount] = await Promise.all([
+    prisma.postLike.groupBy({
+      by: ["postId"],
+      _count: { postId: true },
+      where: { postId: { in: postIds } },
+    }),
+    prisma.postDislike.groupBy({
+      by: ["postId"],
+      _count: { postId: true },
+      where: { postId: { in: postIds } },
+    }),
+  ]);
+
+  const likeCountsMap = Object.fromEntries(likesCount.map(({ postId, _count }) => [postId, _count.postId]));
+  const dislikeCountsMap = Object.fromEntries(dislikesCount.map(({ postId, _count }) => [postId, _count.postId]));
+
+  const postsWithLikesDislikes = posts.map((post) => {
+    const likeCount = likeCountsMap[post.id] || 0;
+    const dislikeCount = dislikeCountsMap[post.id] || 0;
+    const userLiked = post.likes.some((like) => like.userId === user.id);
+    const userDisliked = post.dislikes.some((dislike) => dislike.userId === user.id);
+
+    return { ...post, userLiked, userDisliked, likeCount, dislikeCount };
+  });
+
   const totalPages = Math.ceil(count / (input.perPage as number));
   const hasMore = (input.page as number) < totalPages;
   const hasPrevious = (input.page as number) > 1;
 
-  const postsWithLikesDislikes = await Promise.all(
-    posts.map(async (post) => {
-      const [likeCount, dislikeCount] = await Promise.all([
-        prisma.postLike.count({ where: { postId: post.id } }),
-        prisma.postDislike.count({ where: { postId: post.id } }),
-      ]);
-      const userLiked = post.likes.some((like) => like.userId === user.id);
-      const userDisliked = post.dislikes.some((dislike) => dislike.userId === user.id);
-      return { ...post, userLiked, userDisliked, likeCount, dislikeCount };
-    })
-  );
-
   return { posts: postsWithLikesDislikes, totalPages, hasMore, hasPrevious };
 };
-
 
 export const getPostsByUserResolver = async (
   { user }: Session,
@@ -107,21 +139,35 @@ export const getPostsByUserResolver = async (
     },
   });
 
-  const postsWithLikesDislikes = await Promise.all(
-    posts.map(async (post) => {
-      const [likeCount, dislikeCount] = await Promise.all([
-        prisma.postLike.count({ where: { postId: post.id } }),
-        prisma.postDislike.count({ where: { postId: post.id } }),
-      ]);
-      const userLiked = post.likes.some((like) => like.userId === user.id);
-      const userDisliked = post.dislikes.some((dislike) => dislike.userId === user.id);
-      return { ...post, userLiked, userDisliked, likeCount, dislikeCount };
-    })
-  );
+  const postIds = posts.map((post) => post.id);
+
+  const [likesCount, dislikesCount] = await Promise.all([
+    prisma.postLike.groupBy({
+      by: ["postId"],
+      _count: { postId: true },
+      where: { postId: { in: postIds } },
+    }),
+    prisma.postDislike.groupBy({
+      by: ["postId"],
+      _count: { postId: true },
+      where: { postId: { in: postIds } },
+    }),
+  ]);
+
+  const likeCountsMap = Object.fromEntries(likesCount.map(({ postId, _count }) => [postId, _count.postId]));
+  const dislikeCountsMap = Object.fromEntries(dislikesCount.map(({ postId, _count }) => [postId, _count.postId]));
+
+  const postsWithLikesDislikes = posts.map((post) => {
+    const likeCount = likeCountsMap[post.id] || 0;
+    const dislikeCount = dislikeCountsMap[post.id] || 0;
+    const userLiked = post.likes.some((like) => like.userId === user.id);
+    const userDisliked = post.dislikes.some((dislike) => dislike.userId === user.id);
+
+    return { ...post, userLiked, userDisliked, likeCount, dislikeCount };
+  });
 
   return postsWithLikesDislikes;
 };
-
 
 export const toggleInteractionResolver = async (
   { user }: Session,

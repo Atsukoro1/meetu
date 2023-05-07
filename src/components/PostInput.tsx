@@ -4,17 +4,23 @@ import { useState } from "react";
 import AttachmentPanel from "./AttachmentPanel";
 import Image from "next/image";
 import { env } from "@/env.mjs";
+import { Attachment, Post } from "@prisma/client";
+import { ExtendedPost } from "./Post";
 
-const PostInput = ({ onRefresh }: { onRefresh: () => void; }) => {
+const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) => {
     const createPost = api.post.createPost.useMutation({
-        onSuccess: () => onRefresh()
+        onSuccess: (data: ExtendedPost) => {
+            onCreate(data)
+        }
     });
 
     const session = useSession();
 
+    const [newAttachment, setNewAttachment] = useState<Attachment | null>(null);
+
     const [data, setData] = useState<{ content: string, attachmentId: string }>({
         content: "",
-        attachmentId: ""
+        attachmentId: newAttachment?.id ?? ""
     });
 
     return (
@@ -53,30 +59,34 @@ const PostInput = ({ onRefresh }: { onRefresh: () => void; }) => {
                             ...data,
                             content: ""
                         });
+                        setNewAttachment(null);
                     }}
                 >
                     Publish
                 </button>
             </div>
 
-            {/* {data.attachmentId && (
+            {(newAttachment && newAttachment.type.startsWith("image")) && (
                 <Image
-                    src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${data.attachmentId}`}
+                    src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${newAttachment.id}`}
                     height={150}
                     alt="upload"
                     className="rounded-lg"
                     width={150}
                 />
-            )} */}
+            )}
 
-            <AttachmentPanel 
-                onAttachment={(url) => {
-                    setData({
-                        ...data,
-                        attachmentId: url
-                    });
-                }}
-            />
+            {(newAttachment && newAttachment.type.startsWith("video")) && (
+                <video
+                    src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${newAttachment.id}`}
+                    height={150}
+                    className="rounded-lg"
+                    controls
+                    width={150}
+                />
+            )}
+
+            <AttachmentPanel onAttachment={(attach) => setNewAttachment(attach)} />
         </div>
     )
 };
