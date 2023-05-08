@@ -16,12 +16,12 @@
  */
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
-
 import { getServerAuthSession } from "@/server/auth";
 import { prisma } from "@/server/db";
 
 type CreateContextOptions = {
   session: Session | null;
+  req: NextApiRequest;
 };
 
 /**
@@ -38,6 +38,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     prisma,
+    req: opts.req
   };
 };
 
@@ -55,6 +56,7 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 
   return createInnerTRPCContext({
     session,
+    req
   });
 };
 
@@ -68,6 +70,8 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
+import { createTRPCStoreLimiter } from '@trpc-limiter/memory';
+import { NextApiRequest } from "next";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
@@ -82,6 +86,23 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
     };
   },
 });
+
+const limiter = createTRPCStoreLimiter({
+  root: t,
+  fingerprint: (ctx, _input) => {
+    return ctx.req.headers['x-forwarded-for']?.toString() ?? '127.0.0.1';
+  },
+  windowMs: 20000,
+  message: (retryAfter) => `Too many requests, please try again later. ${retryAfter}`,
+  max: 15,
+  onLimit: (retryAfter, _ctx, fingerprint) => {
+    console.log(retryAfter, fingerprint)
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Too many requests unique',
+    })
+  },
+})
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
@@ -104,7 +125,7 @@ export const createTRPCRouter = t.router;
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure.use(limiter);
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
@@ -127,4 +148,6 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = t.procedure
+  .use(limiter)
+  .use(enforceUserIsAuthed);
