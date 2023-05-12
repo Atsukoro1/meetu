@@ -29,7 +29,10 @@ const NotificationLayout = () => {
 
     return (
         <div className="w-[45%] p-3 flex h-[90vh] overflow-scroll flex-col gap-4">
+            <h1 className='text-3xl font-bold'>Conversations</h1>
+
             <InfiniteScroll
+                className="mt-4"
                 pageStart={1}
                 loadMore={() => {
                     setPage(page + 1);

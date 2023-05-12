@@ -2,7 +2,7 @@ import { AiOutlineSend } from 'react-icons/ai';
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 import Skeleton from "@/components/Skeleton";
-import Message from "@/components/Message";
+import { MessageRenderer } from "@/components/Message";
 import { NotificationType, User, Message as MessageType } from "@prisma/client";
 import { api } from "@/utils/api";
 import { useAtom } from 'jotai';
@@ -81,7 +81,9 @@ const MessageLayout = () => {
 
     return (
         <div className="w-[45%] p-3 d-flex flex-column justify-content-between">
-            <div className="tabs tabs-boxed flex flex-row">
+            <h1 className='text-3xl font-bold'>Messages</h1>
+
+            <div className="tabs tabs-boxed flex mt-3 flex-row">
                 {conversations.data?.map(el => {
                     return (
                         <a
@@ -112,26 +114,28 @@ const MessageLayout = () => {
                 >
                     <div className="flex flex-col gap-3">
                         {cached.map(el => {
-                            return <Message data={el} />
+                            return <MessageRenderer data={el} />
                         })}
                     </div>
                 </InfiniteScroll>
             </div>
 
-            <div className="mt-4 flex flex-row mx-auto w-fit gap-3">
-                <input
-                    className="input input-bordered w-full"
-                    placeholder="Say hi!"
-                    value={newMessage}
-                    onChange={(event) => setNewMessage(event.target.value)}
-                />
+            {selected !== "" && (
+                <div className="mt-4 flex flex-row mx-auto w-fit gap-3">
+                    <input
+                        className="input input-bordered w-full"
+                        placeholder="Say hi!"
+                        value={newMessage}
+                        onChange={(event) => setNewMessage(event.target.value)}
+                    />
 
-                <button onClick={handleNewMessage} className="btn btn-primary">
-                    Send
+                    <button onClick={handleNewMessage} className="btn btn-primary">
+                        Send
 
-                    <AiOutlineSend color="white" size={20} className="ml-3" />
-                </button>
-            </div>
+                        <AiOutlineSend color="white" size={20} className="ml-3" />
+                    </button>
+                </div>
+            )}
         </div>
     );
 

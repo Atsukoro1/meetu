@@ -37,7 +37,9 @@ const PostLayout = () => {
     
     return (
         <div className="w-[45%] p-3">
-                <div className="h-fit mx-auto w-full mt-2">
+                <h1 className='text-3xl font-bold'>Newest posts</h1>
+
+                <div className="h-fit mx-auto w-full mt-4">
                     <PostInput onCreate={(data) => onNewPost(data)} />
                 </div>
 
