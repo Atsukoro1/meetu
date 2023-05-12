@@ -111,7 +111,9 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
             {searchUsers.data?.map(el => {
                 return (<ProfileSearchResult
                     user={el}
-                    onClick={() => alert("aho")}
+                    onClick={() => {
+                        
+                    }}
                 />);
             })}
 
