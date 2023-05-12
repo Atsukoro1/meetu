@@ -1,4 +1,4 @@
-import { fetchFollowingResolver, followUserResolver, meResolver, newUsersResolver, unfollowUserResolver, updateUserResolver } from "../resolvers/user";
+import { fetchFollowingResolver, followUserResolver, meResolver, newUsersResolver, searchUsersResolver, unfollowUserResolver, updateUserResolver } from "../resolvers/user";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import { FetchFollowingSchema, UpdateUserSchema } from "../schema/user";
 import { z } from "zod";
@@ -20,6 +20,12 @@ const userRouter = createTRPCRouter({
     .input(z.string())
     .mutation(({ ctx, input }) => {
       return unfollowUserResolver(ctx.session, input);
+    }),
+
+  searchUsers: publicProcedure
+    .input(z.string().nullable())
+    .query(({ input }) => {
+      return searchUsersResolver(input);
     }),
 
   getFollowing: publicProcedure

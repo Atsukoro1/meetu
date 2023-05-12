@@ -7,6 +7,7 @@ import Link from 'next/link';
 import PostModal from './PostModal';
 import Attachment from './Attachment';
 import moment from 'moment';
+import PostContent from './PostContent';
 
 export type ExtendedPost = Post & {
     author: User;
@@ -71,7 +72,7 @@ const PostComponent = ({ post }: { post: ExtendedPost }) => {
                     <label className='ml-2 opacity-30'>{moment(post.createdAt).fromNow()}</label>
                 </Link>
 
-                <div className="table w-[375px]">{post.content}</div>
+                <PostContent content={post.content}/>
 
                 <Attachment data={post.attachment} />
 

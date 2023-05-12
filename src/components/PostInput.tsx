@@ -6,6 +6,7 @@ import Image from "next/image";
 import { env } from "@/env.mjs";
 import { Attachment } from "@prisma/client";
 import { ExtendedPost } from "./Post";
+import { ProfileSearchResult } from "./ProfileCard";
 
 const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) => {
     const createPost = api.post.createPost.useMutation({
@@ -13,6 +14,12 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
             onCreate(data)
         }
     });
+
+    const [mention, setMention] = useState<string | null>(null);
+    const searchUsers = api.user.searchUsers.useQuery(
+        mention ? mention.replace("@", "")
+            : null
+    );
 
     const session = useSession();
 
@@ -45,8 +52,15 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
                     onChange={(e) => {
                         setData({
                             ...data,
-                            content: e.target.value
+                            content: e.target.value,
                         });
+
+                        const lastWord = e.target.value.split(" ").pop() || "";
+                        if (lastWord.startsWith('@') || lastWord.length !== 1) {
+                            setMention(lastWord);
+                        } else {
+                            setMention(null);
+                        }
                     }}
                     placeholder="New post content..."
                     className="input input-bordered input-primary w-full"
@@ -66,7 +80,7 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
                             ...data,
                             content: ""
                         });
-                        
+
                         setNewAttachment(null);
                     }}
                 >
@@ -93,6 +107,13 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
                     width={150}
                 />
             )}
+
+            {searchUsers.data?.map(el => {
+                return (<ProfileSearchResult
+                    user={el}
+                    onClick={() => alert("aho")}
+                />);
+            })}
 
             <AttachmentPanel onAttachment={(attach) => setNewAttachment(attach)} />
         </div>

@@ -1,12 +1,9 @@
 import type { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import ProviderButton from "@/components/ProviderButton";
 import { getServerSession } from "next-auth/next";
-import { getProviders } from "next-auth/react"
-import { CiCoffeeCup } from 'react-icons/ci';
+import { getProviders } from "next-auth/react";
 import { authOptions } from "@/server/auth";
 import { MessagePlaceholder } from "@/components/Message";
-
-
 
 export default function SignIn({ providers }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
@@ -15,18 +12,9 @@ export default function SignIn({ providers }: InferGetServerSidePropsType<typeof
         <div className="camera"></div>
         <div className="display">
           <div className="artboard artboard-demo phone-1">
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
-            <MessagePlaceholder/>
+            {[0,0,0,0,0,0,0,0].map(() => {
+              return <MessagePlaceholder/>
+            })}
           </div>
         </div>
       </div>
@@ -35,8 +23,7 @@ export default function SignIn({ providers }: InferGetServerSidePropsType<typeof
         <div className="text-center lg:text-left">
           <h1 className="text-5xl text-white font-bold">Login now!</h1>
           <p className="py-6 text-white table w-[300px]">
-            Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi
-            exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.
+            Login now and tween&meet with more than milion like-minded people like you.
           </p>
         </div>
 

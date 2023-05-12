@@ -1,6 +1,6 @@
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import ProfileHighlight, { ExtendedUser } from "@/components/ProfileHighlight";
-import ProfileCard from "@/components/ProfileCard";
+import { ProfileCard } from "@/components/ProfileCard";
 import { authOptions } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { api } from "@/utils/api";

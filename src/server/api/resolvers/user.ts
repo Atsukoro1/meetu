@@ -87,6 +87,32 @@ export const followUserResolver = async (
     });
 };
 
+export const searchUsersResolver = async (nameOrSlug: string | null): Promise<User[]> => {
+    if(!nameOrSlug) return [];
+    
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: nameOrSlug,
+              mode: 'insensitive', // This makes the search case-insensitive
+            },
+          },
+          {
+            slug: {
+              contains: nameOrSlug,
+              mode: 'insensitive', // This makes the search case-insensitive
+            },
+          },
+        ],
+      },
+      take: 5,
+    });
+
+    return users;
+  }
+
 export const unfollowUserResolver = async (
     { user }: Session,
     userId: string

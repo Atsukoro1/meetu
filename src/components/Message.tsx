@@ -5,16 +5,16 @@ import { useSession } from "next-auth/react";
 export const MessagePlaceholder = () => {
     return (
         <div className="chat chat-start">
-            <div className="avatar chat-image online placeholder">
+            <div className="avatar chat-image placeholder">
                 <div className="bg-neutral-focus text-neutral-content rounded-full w-16">
                     <span className="text-xl">JO</span>
                 </div>
             </div>
             <div className="chat-header">
-                Obi-Wan Kenobi
+                Example username
                 <time className="text-xs opacity-50">12:45</time>
             </div>
-            <div className="chat-bubble">You were the Chosen One!</div>
+            <div className="chat-bubble">Example longer chat message!</div>
             <div className="chat-footer opacity-50">
                 Delivered
             </div>
