@@ -1,3 +1,4 @@
+import { Text, Title, createStyles } from '@mantine/core';
 import Link from 'next/link';
 import React from 'react';
 
@@ -5,7 +6,15 @@ type PostContentProps = {
     content: string | null;
 };
 
+const useStyles = createStyles((theme) => ({
+    link: {
+        color: theme.colors.blue
+    }
+}));
+
 const PostContent = ({ content }: PostContentProps) => {
+    const { classes } = useStyles();
+
     if (!content) {
         return null;
     }
@@ -13,29 +22,30 @@ const PostContent = ({ content }: PostContentProps) => {
     const parts = content.split(/(@\w+|#\w+)/g);
 
     return (
-        <div className="table w-[375px]">
+        <Title order={3} size="sm" weight={"600"} className="table w-[375px]">
             {parts.map((part, index) => {
                 if (part.startsWith('@')) {
                     return (
-                        <Link href={`/profile/${part.replace("@", "")}`} className="tooltip" data-tip="Click me to open user's profile">
-                            <span key={index} className="cursor-pointer text-primary">
-                                {part}
-                            </span>
+                        <Link 
+                            className={classes.link} 
+                            href={`/profile/${part.replace("@", "")}`}
+                        >
+                            {part}
                         </Link>
                     );
                 }
 
                 if (part.startsWith('#')) {
                     return (
-                        <span key={index} className="text-secondary cursor-default">
+                        <Text key={index} className="text-secondary cursor-default">
                             {part}
-                        </span>
+                        </Text>
                     );
                 }
 
                 return part;
             })}
-        </div>
+        </Title>
     );
 }
 

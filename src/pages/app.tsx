@@ -10,7 +10,8 @@ import NotificationLayout from "@/layouts/NotificationLayout";
 import MessageLayout from "@/layouts/MessageLayout";
 import { Tab } from "@/components/Navbar";
 import Tip from "@/components/Tip";
-import { Group } from "@mantine/core";
+import { Divider, Group, Title } from "@mantine/core";
+import { FaRetweet } from "react-icons/fa";
 
 const AppPage = ({
     page,
@@ -34,9 +35,9 @@ const AppPage = ({
             <div className="block w-[25%]">
             <div className="p-3">
                 <div className="flex flex-row gap-2">
-                    <h2 className="font-bold text-xl mb-2">Who to follow</h2>
-                    <label className="text-white opacity-40 mt-1">•</label>
-                    <p className="text-primary mt-1 cursor-pointer">Refresh</p>
+                    <Title size="20">Who to follow</Title>
+                    <Divider size="sm" orientation="vertical" />
+                    <FaRetweet className="mt-1.5" color="white"/>
                 </div>
 
                 <div className="flex flex-col gap-4">

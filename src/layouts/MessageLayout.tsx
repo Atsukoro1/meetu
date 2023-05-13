@@ -8,6 +8,7 @@ import { api } from "@/utils/api";
 import { useAtom } from 'jotai';
 import { NotificationPoolAtom } from '@/atoms/NotificationPoolAtom';
 import Tip from '@/components/Tip';
+import { Button, Input } from '@mantine/core';
 
 const MessageLayout = () => {
     const [page, setPage] = useState<number>(1);
@@ -131,7 +132,7 @@ const MessageLayout = () => {
                     </div>
 
                     <div className='mt-3 flex flex-row gap-3'>
-                        <input
+                        <Input
                             className="input input-bordered w-full"
                             onKeyDown={(event) => {
                                 if(event.key == 'Enter') 
@@ -142,11 +143,9 @@ const MessageLayout = () => {
                             onChange={(event) => setNewMessage(event.target.value)}
                         />
 
-                        <button onClick={handleNewMessage} className="btn btn-primary">
-                            Send
-
-                            <AiOutlineSend color="white" size={20} className="ml-3" />
-                        </button>
+                        <Button rightIcon={<AiOutlineSend color="white" size={20} className="ml-3" />} onClick={handleNewMessage} className="btn btn-primary">
+                            Send                            
+                        </Button>
                     </div>
                 </div>
             )}

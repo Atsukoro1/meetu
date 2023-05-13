@@ -17,7 +17,7 @@ export const NotificationReceiverAtom = atom("", (get, set, userId: string) => {
 
     const channel = PusherClient.subscribe(userId);
 
-    channel.bind(NotificationType.MESSAGE, (data: Message) => {
+    channel.bind(NotificationType.MESSAGE, (data: Message & { author: User }) => {
         set(NotificationPoolAtom, [
             ...get(NotificationPoolAtom), 
             {
