@@ -1,11 +1,10 @@
 import { prisma } from "@/server/db";
 import { Notification } from "@prisma/client";
 import { Session } from "next-auth";
-import { FetchNotificationsSchema } from "../schema/notification";
 
 export const fetchNotificationsResolver = async (
   { user }: Session,
-  input: typeof FetchNotificationsSchema._input
+  input: any
 ): Promise<{ notifications: Notification[], hasMorePages: boolean }> => {
   const perPage = input.perPage as number;
   const currentPage = input.page as number;

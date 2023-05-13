@@ -1,16 +1,10 @@
 import { prisma } from "@/server/db";
 import { Conversation, Message, NotificationType, User } from "@prisma/client";
 import { Session } from "next-auth";
-import {
-  CreateConversationSchema,
-  CreateMessageSchema,
-  DeleteConversationSchema,
-  FetchMessagesSchema,
-} from "../schema/conversation";
 import PusherClient from "@/utils/pusher";
 
 export const createConversationResolver = async (
-  input: typeof CreateConversationSchema._input
+  input: any
 ): Promise<Conversation> => {
   const newConversation = await prisma.conversation.create({
     data: {
@@ -24,7 +18,7 @@ export const createConversationResolver = async (
 
 export const deleteConversationResolver = async (
   { user }: Session,
-  input: typeof DeleteConversationSchema._input
+  input: any
 ): Promise<Conversation> => {
   const deletedConversation = await prisma.conversation.delete({
     where: {
@@ -57,7 +51,7 @@ export const fetchResolver = async ({
 
 export const createMessageResolver = async (
   { user }: Session,
-  input: typeof CreateMessageSchema._input
+  input: any
 ): Promise<Message & { author: User }> => {
   const newMessage = await prisma.message.create({
     data: {
@@ -83,7 +77,7 @@ export const createMessageResolver = async (
 
 export const fetchMessagesResolver = async (
   { user }: Session,
-  input: typeof FetchMessagesSchema._input
+  input: any
 ): Promise<{ messages: (Message & { author: User })[], hasMore: boolean }> => {
   const skip = (input.page as number - 1) * (input.perPage as number);
 

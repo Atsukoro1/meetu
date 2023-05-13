@@ -95,7 +95,7 @@ const MessageLayout = () => {
                     )
                 })}
             </div>
-            <div className="flex flex-col gap-2 h-[72vh] overflow-scroll p-4">
+            <div className="flex flex-col gap-2 h-[69vh] overflow-scroll p-4">
                 <InfiniteScroll
                     pageStart={1}
                     loadMore={() => {
@@ -121,19 +121,29 @@ const MessageLayout = () => {
             </div>
 
             {selected !== "" && (
-                <div className="mt-4 flex flex-row mx-auto w-fit gap-3">
-                    <input
-                        className="input input-bordered w-full"
-                        placeholder="Say hi!"
-                        value={newMessage}
-                        onChange={(event) => setNewMessage(event.target.value)}
-                    />
+                <div className="mt-4 mx-auto w-fit gap-3">
+                    <div className='mx-auto w-fit'>
+                        <b>Tip</b>: You can use <kbd className="kbd kbd-sm">Enter</kbd> to send.
+                    </div>
 
-                    <button onClick={handleNewMessage} className="btn btn-primary">
-                        Send
+                    <div className='mt-3 flex flex-row gap-3'>
+                        <input
+                            className="input input-bordered w-full"
+                            onKeyDown={(event) => {
+                                if(event.key == 'Enter') 
+                                    handleNewMessage();
+                            }}
+                            placeholder="Your message..."
+                            value={newMessage}
+                            onChange={(event) => setNewMessage(event.target.value)}
+                        />
 
-                        <AiOutlineSend color="white" size={20} className="ml-3" />
-                    </button>
+                        <button onClick={handleNewMessage} className="btn btn-primary">
+                            Send
+
+                            <AiOutlineSend color="white" size={20} className="ml-3" />
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

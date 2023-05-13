@@ -1,20 +1,11 @@
 import { Session } from "next-auth";
-import {
-  CreatePostCommentSchema,
-  CreatePostSchema,
-  DeletePostCommentSchema,
-  FetchPostsSchema,
-  GetPostCommentsSchema,
-  GetPostsByUserSchema,
-  ToggleInteractionSchema,
-} from "../schema/post";
 import { prisma } from "@/server/db";
 import { Attachment, NotificationType, Post, Prisma } from "@prisma/client";
 import { ExtendedPost } from "@/components/Post";
 
 export const createPostResolver = async (
   { user }: Session,
-  input: typeof CreatePostSchema._input
+  input: any
 ): Promise<ExtendedPost> => {
   const createdPost = await prisma.post.create({
     data: {
@@ -58,7 +49,7 @@ export const createPostAttachmentResolver = async (
 
 export const fetchPostsResolver = async (
   { user }: Session,
-  input: typeof FetchPostsSchema._input
+  input: any
 ): Promise<{
   posts: Post[];
   totalPages: number;
@@ -119,7 +110,7 @@ export const fetchPostsResolver = async (
 
 export const getPostsByUserResolver = async (
   { user }: Session,
-  input: typeof GetPostsByUserSchema._input
+  input: any
 ): Promise<ExtendedPost[]> => {
   const skip = ((input.page as number) - 1) * (input.perPage as number);
   const take = input.perPage;
@@ -171,7 +162,7 @@ export const getPostsByUserResolver = async (
 
 export const toggleInteractionResolver = async (
   { user }: Session,
-  input: typeof ToggleInteractionSchema._input
+  input: any
 ): Promise<Post | null> => {
   const post = await prisma.post.findUnique({ where: { id: input.postId } });
 
@@ -300,7 +291,7 @@ export const toggleInteractionResolver = async (
 
 export const createPostCommentResolver = async (
   { user }: Session,
-  input: typeof CreatePostCommentSchema._input
+  input: any
 ) => {
   const { content, postId } = input;
   const newComment = await prisma.comment.create({
@@ -334,7 +325,7 @@ export const createPostCommentResolver = async (
 
 export const deletePostCommentResolver = async (
   { user }: Session,
-  input: typeof DeletePostCommentSchema._input
+  input: any
 ) => {
   const deletedComment = await prisma.comment.delete({
     where: { id: input.commentId },
@@ -345,7 +336,7 @@ export const deletePostCommentResolver = async (
 
 export const getPostComments = async (
   { user }: Session,
-  input: typeof GetPostCommentsSchema._input
+  input: any
 ) => {
     const skip = input.perPage * (input.page - 1);
     const [comments, commentsCount] = await Promise.all([

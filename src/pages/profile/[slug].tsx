@@ -5,7 +5,7 @@ import { api } from "@/utils/api";
 import { getServerSession } from "next-auth";
 import { useMemo, useState } from "react";
 import SocialBadge from "@/components/SocialBadge";
-import ProfileCard from "@/components/ProfileCard";
+import { ProfileCard } from "@/components/ProfileCard";
 import Skeleton from "@/components/Skeleton";
 import { Social } from "@prisma/client";
 import Post, { ExtendedPost } from "@/components/Post";
@@ -93,19 +93,23 @@ const FollowingTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServe
 };
 
 const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-    const createConversation = api.conversation.createConversation.useMutation();
     const [following, setFollowing] = useState<boolean>(isFollowing);
     const fetchConversation = api.conversation.fetch.useQuery();
     const [activeTab, setActiveTab] = useState<number>(1);
     const session = useSession();
 
+    const createConversation = api.conversation.createConversation.useMutation({
+        onSuccess(_data, _variables, _context) {
+            fetchConversation.refetch();
+        },
+    });
     const followUser = api.user.folllowUser.useMutation({
-        onSuccess: () => {
+        onSuccess(_data, _variables, _context) {
             setFollowing(true);
         }
     });
     const unfollowUser = api.user.unfollowUser.useMutation({
-        onSuccess: () => {
+        onSuccess(_data, _variables, _context) {
             setFollowing(false);
         }
     })
@@ -157,7 +161,7 @@ const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getSe
                     )}
                 </div>
 
-                <div className="p-5">
+                <div className={`p-5 ${session.data?.user.id !== user.id && "mt-[-50px]"}`}>
                     <div className="flex flex-row">
                         <div className="avatar online mt-[-70px]">
                             <div className="w-24 rounded-xl">

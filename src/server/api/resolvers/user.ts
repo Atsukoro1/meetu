@@ -1,5 +1,4 @@
 import PusherClient from "@/utils/pusher";
-import { FetchFollowingSchema, UpdateUserSchema } from "../schema/user";
 import { prisma } from "@/server/db";
 import slugify from "@/utils/slugify";
 import { NotificationType, User } from "@prisma/client";
@@ -126,7 +125,7 @@ export const unfollowUserResolver = async (
 }
 
 export const fetchFollowingResolver = async (
-    input: typeof FetchFollowingSchema._input
+    input: any
 ): Promise<any> => {
     const skip = (input.page as number - 1) * (input.perPage as number);
 
@@ -148,7 +147,7 @@ export const fetchFollowingResolver = async (
 
 export const updateUserResolver = async (
     { user }: Session,
-    data: typeof UpdateUserSchema._input
+    data: any
 ): Promise<void> => {
     await prisma.user.update({
         where: {
@@ -166,7 +165,7 @@ export const updateUserResolver = async (
             ...data.socials && {
                 socials: {
                     createMany: {
-                        data: data.socials.map(el => {
+                        data: data.socials.map((el: any) => {
                             return {
                                 type: el.type,
                                 text: el.text,

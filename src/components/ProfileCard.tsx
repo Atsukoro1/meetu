@@ -43,7 +43,7 @@ export const ProfileCard = ({ user }: ProfileCardPropsI) => {
                 backgroundAttachment: "fixed"
             }}
             href={`/profile/${user.slug}`}
-            className={`bg-cover bg-opacity-30 flex flex-row bg-base-100 rounded-xl hover:bg-neutral transition-all ease-in-out hover:cursor-pointer`}
+            className={`bg-cover overflow-hidden bg-opacity-30 flex flex-row bg-base-100 rounded-xl hover:bg-neutral transition-all ease-in-out hover:cursor-pointer`}
         >
             <div className="flex flex-row bg-gradient-to-r from-40% from-neutral/[.90] via-neutral/[.70] to-transparent w-full bg-opacity-50 p-3">
                 <div className="mr-4">

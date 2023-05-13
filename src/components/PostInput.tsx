@@ -56,7 +56,7 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
                         });
 
                         const lastWord = e.target.value.split(" ").pop() || "";
-                        if (lastWord.startsWith('@') || lastWord.length !== 1) {
+                        if (lastWord.startsWith('@') && lastWord.length !== 1) {
                             setMention(lastWord);
                         } else {
                             setMention(null);
@@ -109,12 +109,19 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
             )}
 
             {searchUsers.data?.map(el => {
-                return (<ProfileSearchResult
-                    user={el}
-                    onClick={() => {
-                        
-                    }}
-                />);
+                return (
+                    <ProfileSearchResult
+                        user={el}
+                        onClick={() => {
+                            const updatedContent = data.content.replace(mention ?? '', `@${el.slug}`);
+                            setData({
+                                ...data,
+                                content: updatedContent
+                            });
+                            setMention(null);
+                        }}
+                    />
+                );
             })}
 
             <AttachmentPanel onAttachment={(attach) => setNewAttachment(attach)} />

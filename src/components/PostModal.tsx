@@ -5,6 +5,7 @@ import { api } from '@/utils/api';
 import { Comment, Post, User } from '@prisma/client';
 import { BsArrow90DegUp } from 'react-icons/bs';
 import Pagination from './Pagination';
+import PostContent from './PostContent';
 
 type PostModalCommentInputPropsI = {
     post: ExtendedPost;
@@ -86,7 +87,7 @@ const PostModalBlockComment = ({ comment }: { comment: Comment & { author: User 
 
                 <div className="ml-5">
                     <h1 className="text-xl font-bold">{comment.author.name}</h1>
-                    <p className="table w-[380px]">{comment.content}</p>
+                    <p className="table w-[380px]"><PostContent content={comment.content}/></p>
                 </div>
             </div>
         </div>

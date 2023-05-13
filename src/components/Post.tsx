@@ -81,7 +81,7 @@ const PostComponent = ({ post }: { post: ExtendedPost }) => {
                         <FaRegThumbsUp
                             onClick={() => {
                                 toggleInteraction.mutateAsync({
-                                    postId: post.id,
+                                    postId: post.id, 
                                     type: 'LIKE',
                                 });
                                 changeLiked(liked ? false : true);

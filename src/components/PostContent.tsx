@@ -27,11 +27,9 @@ const PostContent = ({ content }: PostContentProps) => {
 
                 if (part.startsWith('#')) {
                     return (
-                        <div className="tooltip" data-tip="Click me to see the hashtag">
-                            <span key={index} className="cursor-pointer text-primary">
-                                {part}
-                            </span>
-                        </div>
+                        <span key={index} className="text-secondary cursor-default">
+                            {part}
+                        </span>
                     );
                 }
 
