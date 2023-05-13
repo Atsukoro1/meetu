@@ -48,44 +48,6 @@ export const newUsersResolver = async (): Promise<User[]> => {
     return recentUsers;
 }
 
-export const followUserResolver = async (
-    { user }: Session,
-    userId: string
-): Promise<void> => {
-    const existingRelation = await prisma.userFollows.findUnique({
-        where: {
-            followerId_followingId: {
-                followerId: userId,
-                followingId: user.id,
-            },
-        },
-    });
-    if (existingRelation) return;
-
-    await prisma.userFollows.create({
-        data: {
-            followerId: userId,
-            followingId: user.id,
-        },
-    });
-
-    PusherClient.trigger(
-        userId, 
-        NotificationType.FOLLOW, 
-        user
-    );
-
-    await prisma.notification.create({
-        data: {
-            type: NotificationType.FOLLOW,
-            title: "New follow",
-            content: `User ${user.name} just followed you!`,
-            image: user.image,
-            recipientId: userId
-        }
-    });
-};
-
 export const searchUsersResolver = async (nameOrSlug: string | null): Promise<User[]> => {
     if(!nameOrSlug) return [];
     
@@ -143,38 +105,4 @@ export const fetchFollowingResolver = async (
     });
 
     return followings;
-}
-
-export const updateUserResolver = async (
-    { user }: Session,
-    data: any
-): Promise<void> => {
-    await prisma.user.update({
-        where: {
-            id: user.id
-        },
-        data: {
-            slug: slugify(user.name || ""),
-            ...data.gender && { gender: data.gender },
-            ...data.age && { age: data.age },
-            ...data.bio && { bio: data.bio },
-            ...data.hobbies && { hobbies: data.hobbies },
-            ...data.image && { image: data.image },
-            ...data.banner && { banner: data.banner },
-            ...data.setupDone && { setupDone: data.setupDone },
-            ...data.socials && {
-                socials: {
-                    createMany: {
-                        data: data.socials.map((el: any) => {
-                            return {
-                                type: el.type,
-                                text: el.text,
-                                url: el.url
-                            }
-                        })
-                    }
-                }
-            }
-        }
-    });
 }

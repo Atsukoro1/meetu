@@ -82,7 +82,7 @@ const FollowingTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServe
                     height="100px"
                 />
             ) : (
-                followings.data.following.map((el: any) => {
+                followings.data?.following.map((el: any) => {
                     return (
                         <ProfileCard user={el.following} />
                     )
