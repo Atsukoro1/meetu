@@ -2,30 +2,52 @@ import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { api } from "@/utils/api";
-import Navbar from "@/components/Navbar";
+import Navbar, { Tab } from "@/components/Navbar";
 import NotificationListener from "@/components/NotificationListener";
-import themeAtom from "@/atoms/ThemeAtom";
-import { useAtom } from 'jotai';
+import { MantineProvider } from '@mantine/core';
 
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import 'filepond/dist/filepond.min.css'
-import "daisyui/dist/full.css";
 import "@/styles/globals.css";
+import { useState } from "react";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
-  const [theme, setTheme] = useAtom(themeAtom);
+  const [tab, setTab] = useState<Tab>(Tab.EXPLORE);
 
   return (
-    <SessionProvider session={session}>
-      <div data-theme={theme}>
-        <NotificationListener/>
-        <Navbar onThemeChange={(value) => setTheme(value)}/>
-        <Component {...pageProps} />
-      </div>
-    </SessionProvider>
+    <MantineProvider 
+      withGlobalStyles 
+      withNormalizeCSS
+      theme={{
+        colorScheme: 'dark',
+        colors: {
+          dark: [
+            '#d5d7e0',
+            '#acaebf',
+            '#8c8fa3',
+            '#666980',
+            '#4d4f66',
+            '#34354a',
+            '#2b2c3d',
+            '#1d1e30',
+            '#0c0d21',
+            '#01010a',
+          ],
+        },
+      }}
+    >
+      <SessionProvider session={session}>
+        <NotificationListener />
+        <Navbar onTabSelect={(tab: Tab) => setTab(tab)} />
+        <Component 
+          page={tab} 
+          {...pageProps} 
+        />
+      </SessionProvider>
+    </MantineProvider>
   );
 };
 

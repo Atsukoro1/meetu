@@ -1,132 +1,83 @@
-import { FaRegThumbsDown, FaRegThumbsUp } from 'react-icons/fa';
-import { BiCommentDetail } from 'react-icons/bi';
-import { Attachment as AttachmentI, Post, User } from '@prisma/client';
-import { api } from '@/utils/api';
-import { useState } from 'react';
-import Link from 'next/link';
-import PostModal from './PostModal';
-import Attachment from './Attachment';
+import { createStyles, Text, Avatar, Group, Paper, ActionIcon } from '@mantine/core';
+import { Attachment, Post, User } from '@prisma/client';
 import moment from 'moment';
-import PostContent from './PostContent';
+import { FaBookmark, FaRegThumbsDown, FaThumbsUp } from 'react-icons/fa';
+
+const useStyles = createStyles((theme) => ({
+  body: {
+    marginBottom: 10,
+    paddingTop: theme.spacing.sm,
+  },
+
+  border: {
+    padding: `${theme.spacing.lg} ${theme.spacing.xl}`,
+  },
+
+  avatar: {
+    image: {
+        height: 50,
+        width: 50
+    }
+  },
+
+  action: {
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+    ...theme.fn.hover({
+      backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
+    }),
+  },
+}));
+
+interface PostSimpleProps {
+  post: ExtendedPost;
+}
 
 export type ExtendedPost = Post & {
     author: User;
     userLiked: boolean;
     userDisliked: boolean;
-    attachment: AttachmentI | null;
+    attachment: Attachment | null;
     likeCount: number;
     dislikeCount: number;
 };
 
-const PostComponent = ({ post }: { post: ExtendedPost }) => {
-    const [commentModalOpen, setCommentModalOpen] = useState<boolean>(false);
-    const toggleInteraction = api.post.toggleInteraction.useMutation();
-    const [disliked, setDisliked] = useState<boolean>(post.userDisliked);
-    const [liked, setLiked] = useState<boolean>(post.userLiked);
-    const [likedCount, setLikedCount] = useState<number>(post.likeCount);
-    const [dislikedCount, setDislikedCount] = useState<number>(post.dislikeCount);
+export function PostSimple({ post }: PostSimpleProps) {
+  const { classes, theme } = useStyles();
 
+  return (
+    <Paper withBorder radius="md" className={classes.border}>
+      <Group>
+        <Avatar 
+            src={post.author.image} 
+            alt={post.author.name || ""}
+            className={classes.avatar}
+        />
 
-    const changeLiked = (to: boolean) => {
-        if (disliked) {
-            setDisliked(false);
-            setDislikedCount(dislikedCount - 1);
-        }
-
-        if (to) {
-            setLikedCount(likedCount + 1);
-        } else {
-            setLikedCount(likedCount - 1);
-        }
-
-        setLiked(to);
-    };
-
-    const changeDisliked = (to: boolean) => {
-        if (liked) {
-            setLiked(false);
-            setLikedCount(likedCount - 1);
-        }
-
-        if (to) {
-            setDislikedCount(dislikedCount + 1);
-        } else {
-            setDislikedCount(dislikedCount - 1);
-        }
-
-        setDisliked(to);
-    };
-
-    return (
-        <div className="bg-neutral p-5 rounded-lg flex flex-row">
-            <Link href={`/profile/${post.author.slug}`} className="avatar">
-                <div className="w-14 h-14 rounded-xl">
-                    <img src={post.author.image || ''} />
-                </div>
-            </Link>
-
-            <div className="ml-5">
-                <Link href={`/profile/${post.author.slug}`} className="flex flex-row gap-1">
-                    <h2 className="font-semibold text-md">{post.author.name}</h2>
-                    <label className="ml-1.5">@{post.author.slug}</label>
-                    <label className='ml-2 opacity-30'>{moment(post.createdAt).fromNow()}</label>
-                </Link>
-
-                <PostContent content={post.content}/>
-
-                <Attachment data={post.attachment} />
-
-                <div className="flex flex-row gap-2 mt-2">
-                    <div className='flex flex-row gap-2'>
-                        <FaRegThumbsUp
-                            onClick={() => {
-                                toggleInteraction.mutateAsync({
-                                    postId: post.id, 
-                                    type: 'LIKE',
-                                });
-                                changeLiked(liked ? false : true);
-                            }}
-                            size={25}
-                            className={`hover:cursor-pointer ${liked && 'text-primary'}`}
-                        />
-
-                        {likedCount}
-                    </div>
-
-                    <div className='flex flex-row gap-2'>
-                        <FaRegThumbsDown
-                            onClick={() => {
-                                toggleInteraction.mutateAsync({
-                                    postId: post.id,
-                                    type: 'DISLIKE',
-                                });
-                                changeDisliked(disliked ? false : true);
-                            }}
-                            size={25}
-                            className={`hover:cursor-pointer ${disliked && 'text-primary'}`}
-                        />
-
-                        {dislikedCount}
-                    </div>
-
-                    <label onClick={() => setCommentModalOpen(true)}>
-                        <BiCommentDetail
-                            size={25}
-                            className={`hover:cursor-pointer`}
-                        />
-                    </label>
-                </div>
-            </div>
-
-            {commentModalOpen && (
-                <PostModal
-                    onClose={() => setCommentModalOpen(false)}
-                    visible={commentModalOpen}
-                    post={post}
-                />
-            )}
+        <div>
+          <Text size="sm">{post.author.name}</Text>
+          <Text size="xs" color="dimmed">
+            {moment().from(post.createdAt)}
+          </Text>
         </div>
-    )
-};
+      </Group>
 
-export default PostComponent;
+      <Text className={classes.body} size="sm">
+        {post.content}
+      </Text>
+
+      <Group spacing={8} mr={0}>
+          <ActionIcon className={classes.action}>
+            <FaThumbsUp size="1rem" />
+          </ActionIcon>
+          <ActionIcon className={classes.action}>
+            <FaRegThumbsDown size="1rem" />
+          </ActionIcon>
+          <ActionIcon className={classes.action}>
+            <FaBookmark size="1rem" color={theme.colors.yellow[7]} />
+          </ActionIcon>
+        </Group>
+    </Paper>
+  );
+}
+
+export default PostSimple;

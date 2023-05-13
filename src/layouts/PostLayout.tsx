@@ -36,16 +36,10 @@ const PostLayout = () => {
     };
     
     return (
-        <div className="w-[45%] p-3">
-                <h1 className='text-3xl font-bold'>Newest posts</h1>
+        <div className="w-[45%] pl-3 pr-3">
+                <PostInput onCreate={(data) => onNewPost(data)} />
 
-                <div className="h-fit mx-auto w-full mt-4">
-                    <PostInput onCreate={(data) => onNewPost(data)} />
-                </div>
-
-                <div className="divider"></div>
-
-                <div className="flex h-[60vh] flex-col gap-3 overflow-scroll">
+                <div className="flex h-[80vh] flex-col gap-2 overflow-scroll">
                     <InfiniteScroll
                         pageStart={0}
                         loadMore={() => {
@@ -61,7 +55,7 @@ const PostLayout = () => {
                         }
                         useWindow={false}
                     >
-                        <div className="flex flex-col gap-8">
+                        <div className="flex flex-col gap-5">
                             {cachedPosts.map((el: any) => {
                                 return (
                                     <Post

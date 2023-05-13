@@ -6,20 +6,31 @@ import Image from "next/image";
 import { env } from "@/env.mjs";
 import { Attachment } from "@prisma/client";
 import { ExtendedPost } from "./Post";
-import { ProfileSearchResult } from "./ProfileCard";
+import { Avatar, Button, Modal, TextInput, createStyles } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+
+const useStyles = createStyles((theme) => ({
+    avatar: {
+        image: {
+            height: 50,
+            width: 50
+        }
+    },
+
+    input: {
+        width: "100%"
+    }
+}));
 
 const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) => {
+    const [opened, { open, close }] = useDisclosure();
+    const { classes } = useStyles();
+
     const createPost = api.post.createPost.useMutation({
         onSuccess: (data: ExtendedPost) => {
             onCreate(data)
         }
     });
-
-    const [mention, setMention] = useState<string | null>(null);
-    const searchUsers = api.user.searchUsers.useQuery(
-        mention ? mention.replace("@", "")
-            : null
-    );
 
     const session = useSession();
 
@@ -53,44 +64,60 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
         setNewAttachment(null);
     }
 
+    useEffect(() => {
+        function handleKeyPress(event: any) {
+            if (event.ctrlKey && event.key === 'p') {
+              open();
+              event.preventDefault();
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyPress);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyPress);
+        };
+    }, []);
+
     return (
-        <div className="bg-neutral p-4 rounded-lg">
+        <Modal 
+            opened={opened} 
+            onClose={close} 
+            title="Create a new post" 
+            className="bg-neutral p-4 rounded-lg"
+        >
             <div className="flex w-full mb-4 mx-auto flex-row gap-4">
                 <div className="avatar">
-                    <div className="w-12 h-12 rounded-xl">
-                        <img src={session.data?.user.image || ""} />
-                    </div>
+                    <Avatar
+                        src={session.data?.user.image}
+                        alt="it's me"
+                        className={classes.avatar}
+                        size="md"
+                    />
                 </div>
 
-                <input
+                <TextInput
                     onKeyDown={(event) => {
-                        if(event.key === 'Enter') onNewPost();
+                        if (event.key === 'Enter') onNewPost();
                     }}
-                    type="text"
+                    placeholder="New post content..."
+                    className={classes.input}
+                    size="md"
                     value={data.content}
                     onChange={(e) => {
                         setData({
                             ...data,
                             content: e.target.value,
                         });
-
-                        const lastWord = e.target.value.split(" ").pop() || "";
-                        if (lastWord.startsWith('@') && lastWord.length !== 1) {
-                            setMention(lastWord);
-                        } else {
-                            setMention(null);
-                        }
                     }}
-                    placeholder="New post content..."
-                    className="input input-bordered input-primary w-full"
                 />
 
-                <button
-                    className="btn btn-primary"
-                    onClick={onNewPost}
+                <Button
+                    onClick={() => onNewPost()}
+                    size="md"
                 >
-                    Publish
-                </button>
+                    Post
+                </Button>
             </div>
 
             {(newAttachment && newAttachment.type.startsWith("image")) && (
@@ -113,24 +140,8 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
                 />
             )}
 
-            {searchUsers.data?.map(el => {
-                return (
-                    <ProfileSearchResult
-                        user={el}
-                        onClick={() => {
-                            const updatedContent = data.content.replace(mention ?? '', `@${el.slug}`);
-                            setData({
-                                ...data,
-                                content: updatedContent
-                            });
-                            setMention(null);
-                        }}
-                    />
-                );
-            })}
-
             <AttachmentPanel onAttachment={(attach) => setNewAttachment(attach)} />
-        </div>
+        </Modal>
     )
 };
 

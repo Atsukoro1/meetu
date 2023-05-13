@@ -7,6 +7,7 @@ import { NotificationType, User, Message as MessageType } from "@prisma/client";
 import { api } from "@/utils/api";
 import { useAtom } from 'jotai';
 import { NotificationPoolAtom } from '@/atoms/NotificationPoolAtom';
+import Tip from '@/components/Tip';
 
 const MessageLayout = () => {
     const [page, setPage] = useState<number>(1);
@@ -80,9 +81,7 @@ const MessageLayout = () => {
     };
 
     return (
-        <div className="w-[45%] p-3 d-flex flex-column justify-content-between">
-            <h1 className='text-3xl font-bold'>Messages</h1>
-
+        <div className="w-[45%] pr-3 pl-3 d-flex flex-column justify-content-between">
             <div className="tabs tabs-boxed flex mt-3 flex-row">
                 {conversations.data?.map(el => {
                     return (
@@ -123,7 +122,12 @@ const MessageLayout = () => {
             {selected !== "" && (
                 <div className="mt-4 mx-auto w-fit gap-3">
                     <div className='mx-auto w-fit'>
-                        <b>Tip</b>: You can use <kbd className="kbd kbd-sm">Enter</kbd> to send.
+                        <Tip
+                            actionText='to send message'
+                            keys={[
+                                "Enter"
+                            ]}
+                        />
                     </div>
 
                     <div className='mt-3 flex flex-row gap-3'>

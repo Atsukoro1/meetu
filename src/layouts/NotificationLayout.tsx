@@ -28,9 +28,7 @@ const NotificationLayout = () => {
     
 
     return (
-        <div className="w-[45%] p-3 flex h-[90vh] overflow-scroll flex-col gap-4">
-            <h1 className='text-3xl font-bold'>Notifications</h1>
-
+        <div className="w-[45%] pr-3 pl-3 flex h-[90vh] overflow-scroll flex-col gap-4">
             <InfiniteScroll
                 className="mt-4"
                 pageStart={1}
