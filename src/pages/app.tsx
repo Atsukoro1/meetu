@@ -34,8 +34,14 @@ const AppPage = ({
             {page === OnClickMenuAction.NOTIFICATIONS && <NotificationLayout/>}
             {page === OnClickMenuAction.MESSAGES && <MessageLayout/>}
 
-            <div className="p-3 w-[25%]">
-                <h2 className="font-bold text-xl mb-2">Explore new profiles</h2>
+            <div className="block w-[25%]">
+            <div className="p-3">
+                <div className="flex flex-row gap-2">
+                    <h2 className="font-bold text-xl mb-2">Who to follow</h2>
+                    <label className="text-white opacity-40 mt-1">•</label>
+                    <p className="text-primary mt-1 cursor-pointer">Refresh</p>
+                </div>
+
                 <div className="flex flex-col gap-4">
                     {recentUsers.map((el: User) => {
                         return (
@@ -43,6 +49,26 @@ const AppPage = ({
                         )
                     })}
                 </div>
+            </div>
+
+            <div className="p-3">
+                <div className="flex flex-row gap-2">
+                    <h2 className="font-bold text-xl mb-2">Trends</h2>
+                    <label className="text-white opacity-40 mt-1">•</label>
+                    <p className="text-secondary mt-1 cursor-pointer">Czech Republic</p>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                    <p className="text-primary cursor-pointer">#slavesarecool</p>
+                    <p className="text-primary cursor-pointer">#slavesarecool</p>
+                    <p className="text-primary cursor-pointer">#slavesarecool</p>
+                    <p className="text-primary cursor-pointer">#slavesarecool</p>
+                    <p className="text-primary cursor-pointer">#slavesarecool</p>
+                    <p className="text-primary cursor-pointer">#slavesarecool</p>
+                    <p className="text-primary cursor-pointer">#slavesarecool</p>
+                    <p className="text-primary cursor-pointer">#slavesarecool</p>
+                </div>
+            </div>
             </div>
         </div>
     )
@@ -60,7 +86,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
 
     const recentUsers = await prisma.user.findMany({
-        take: 10,
+        take: 3,
         orderBy: { createdAt: 'desc' },
     });
 

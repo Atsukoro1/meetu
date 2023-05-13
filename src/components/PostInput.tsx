@@ -37,6 +37,22 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
         })
     }, [newAttachment]);
 
+    const onNewPost = async () => {
+        createPost.mutateAsync({
+            content: data.content,
+            ...data.attachmentId && {
+                attachmentId: data.attachmentId
+            }
+        });
+
+        setData({
+            ...data,
+            content: ""
+        });
+
+        setNewAttachment(null);
+    }
+
     return (
         <div className="bg-neutral p-4 rounded-lg">
             <div className="flex w-full mb-4 mx-auto flex-row gap-4">
@@ -47,6 +63,9 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
                 </div>
 
                 <input
+                    onKeyDown={(event) => {
+                        if(event.key === 'Enter') onNewPost();
+                    }}
                     type="text"
                     value={data.content}
                     onChange={(e) => {
@@ -68,21 +87,7 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
 
                 <button
                     className="btn btn-primary"
-                    onClick={() => {
-                        createPost.mutateAsync({
-                            content: data.content,
-                            ...data.attachmentId && {
-                                attachmentId: data.attachmentId
-                            }
-                        });
-
-                        setData({
-                            ...data,
-                            content: ""
-                        });
-
-                        setNewAttachment(null);
-                    }}
+                    onClick={onNewPost}
                 >
                     Publish
                 </button>
