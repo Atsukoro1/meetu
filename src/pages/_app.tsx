@@ -4,12 +4,17 @@ import { type Session } from "next-auth";
 import { api } from "@/utils/api";
 import Navbar, { Tab } from "@/components/Navbar";
 import NotificationListener from "@/components/NotificationListener";
-import { MantineProvider } from '@mantine/core';
+import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
 
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 import 'filepond/dist/filepond.min.css'
 import "@/styles/globals.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAtom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
+import { Notifications } from "@mantine/notifications";
+
+const darkModeAtom = atomWithStorage<ColorScheme>('darkMode', "light");
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -17,38 +22,34 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   const [tab, setTab] = useState<Tab>(Tab.EXPLORE);
 
+  const [darkMode, setDarkMode] = useAtom(darkModeAtom);
+  const [colorScheme, setColorScheme] = useState<ColorScheme>(darkMode);
+
+  const toggleColorScheme = (value?: ColorScheme) =>
+    setDarkMode(value || (colorScheme === 'dark' ? 'light' : 'dark'));
+
+  useEffect(() => {
+    setColorScheme(darkMode);
+  }, [darkMode]);
+
   return (
-    <MantineProvider 
-      withGlobalStyles 
-      withNormalizeCSS
-      theme={{
-        primaryColor: 'indigo',
-        colorScheme: 'dark',
-        colors: {
-          dark: [
-            '#d5d7e0',
-            '#acaebf',
-            '#8c8fa3',
-            '#666980',
-            '#4d4f66',
-            '#34354a',
-            '#2b2c3d',
-            '#1d1e30',
-            '#0c0d21',
-            '#01010a',
-          ],
-        },
-      }}
-    >
-      <SessionProvider session={session}>
-        <NotificationListener />
-        <Navbar onTabSelect={(tab: Tab) => setTab(tab)} />
-        <Component 
-          page={tab} 
-          {...pageProps} 
-        />
-      </SessionProvider>
-    </MantineProvider>
+    <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
+      <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{ colorScheme }}
+      >
+        <SessionProvider session={session}>
+          <NotificationListener />
+          <Notifications />
+          <Navbar onTabSelect={(tab: Tab) => setTab(tab)} />
+          <Component
+            page={tab}
+            {...pageProps}
+          />
+        </SessionProvider>
+      </MantineProvider>
+    </ColorSchemeProvider>
   );
 };
 

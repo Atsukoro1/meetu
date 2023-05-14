@@ -2,15 +2,43 @@ import { AiOutlineSend } from 'react-icons/ai';
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 import Skeleton from "@/components/Skeleton";
-import { MessageRenderer } from "@/components/Message";
+import { Message } from "@/components/Message";
 import { NotificationType, User, Message as MessageType } from "@prisma/client";
 import { api } from "@/utils/api";
 import { useAtom } from 'jotai';
 import { NotificationPoolAtom } from '@/atoms/NotificationPoolAtom';
 import Tip from '@/components/Tip';
-import { Button, Input } from '@mantine/core';
+import { Avatar, Box, Button, Grid, Group, Text, Input, Paper, UnstyledButton, createStyles, Title, Flex, ScrollArea } from '@mantine/core';
+import { IconChevronRight } from '@tabler/icons-react';
+import { useSession } from 'next-auth/react';
+import { FaPaperPlane } from 'react-icons/fa';
+
+const useStyles = createStyles((theme) => ({
+    user: {
+        display: 'block',
+        width: '100%',
+        padding: theme.spacing.md,
+        color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
+
+        '&:hover': {
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+        },
+        marginBottom: 15
+    },
+
+    contentGrid: {
+        padding: 20
+    },
+
+    messageContainer: {
+        flex: 1,
+        flexDirection: "column"
+    }
+}));
 
 const MessageLayout = () => {
+    const { data } = useSession();
+    const { classes } = useStyles();
     const [page, setPage] = useState<number>(1);
     const [notifications, setNotifications] = useAtom(NotificationPoolAtom);
 
@@ -72,6 +100,8 @@ const MessageLayout = () => {
     }, [notifications, selected, cached, setNotifications]);
 
     const handleNewMessage = () => {
+        if(newMessage === '') return;
+
         createNewMessage.mutateAsync({
             content: newMessage,
             imageUrl: null,
@@ -83,72 +113,67 @@ const MessageLayout = () => {
 
     return (
         <div className="w-[45%] pr-3 pl-3 d-flex flex-column justify-content-between">
-            <div className="tabs tabs-boxed flex mt-3 flex-row">
-                {conversations.data?.map(el => {
-                    return (
-                        <a
-                            className={`tab ${selected === el.id && 'tab-active'}`}
-                            onClick={() => setSelected(el.id)}
-                        >
-                            {el.title}
-                        </a>
-                    )
-                })}
-            </div>
-            <div className="flex flex-col gap-2 h-[69vh] overflow-scroll p-4">
-                <InfiniteScroll
-                    pageStart={1}
-                    loadMore={() => {
-                        setPage(page +
-                            1);
-                    }}
-                    hasMore={messages.data?.hasMore}
-                    loader={
-                        <div className="gap-4 flex flex-col">
-                            <Skeleton height="120px" width="100%" />
-                            <Skeleton height="120px" width="100%" />
-                            <Skeleton height="120px" width="100%" />
-                        </div>
-                    }
-                    useWindow={false}
-                >
-                    <div className="flex flex-col gap-3">
+            <Grid>
+                <Grid.Col className={classes.contentGrid} span={4}>
+                    <Title mb={5} size="lg">Your conversations</Title>
+
+                    {conversations.data?.map(el => {
+                        return (
+                            <UnstyledButton onClick={() => setSelected(el.id)} className={classes.user}>
+                                <Group>
+                                    <Avatar color="cyan" radius="md">MK</Avatar>
+
+                                    <div style={{ flex: 1 }}>
+                                        <Text size="sm" weight={500}>
+                                            {el.title}
+                                        </Text>
+
+                                        <Text color="dimmed" size="xs">
+                                            {el.id}
+                                        </Text>
+                                    </div>
+
+                                    <IconChevronRight size="0.9rem" stroke={1.5} />
+                                </Group>
+                            </UnstyledButton>
+                        )
+                    })}
+                </Grid.Col>
+
+                <Grid.Col className={classes.contentGrid} span={8}>
+                    <ScrollArea h={"60vh"} w={"100%"} className={classes.messageContainer}>
                         {cached.map(el => {
-                            return <MessageRenderer data={el} />
+                            return (
+                                <Message
+                                    data={el}
+                                    isAuthor={data?.user.id === el.authorId}
+                                />
+                            )
                         })}
-                    </div>
-                </InfiniteScroll>
-            </div>
+                    </ScrollArea>
 
-            {selected !== "" && (
-                <div className="mt-4 mx-auto w-fit gap-3">
-                    <div className='mx-auto w-fit'>
-                        <Tip
-                            actionText='to send message'
-                            keys={[
-                                "Enter"
-                            ]}
-                        />
-                    </div>
-
-                    <div className='mt-3 flex flex-row gap-3'>
+                    <Flex gap={10} mt={20} align="bottom">
                         <Input
-                            className="input input-bordered w-full"
-                            onKeyDown={(event) => {
-                                if(event.key == 'Enter') 
-                                    handleNewMessage();
+                            w={"100%"}
+                            placeholder='Your new message...'
+                            onKeyDown={(e) => {
+                                if(e.key === 'Enter') handleNewMessage();
                             }}
-                            placeholder="Your message..."
+                            onChange={(e) => {
+                                setNewMessage(e.target.value);
+                            }}
                             value={newMessage}
-                            onChange={(event) => setNewMessage(event.target.value)}
                         />
 
-                        <Button rightIcon={<AiOutlineSend color="white" size={20} className="ml-3" />} onClick={handleNewMessage} className="btn btn-primary">
-                            Send                            
+                        <Button 
+                            rightIcon={<FaPaperPlane/>}
+                            onClick={handleNewMessage}
+                        >
+                            Send
                         </Button>
-                    </div>
-                </div>
-            )}
+                    </Flex>
+                </Grid.Col>
+            </Grid>
         </div>
     );
 

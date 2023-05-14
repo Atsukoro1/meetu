@@ -134,7 +134,7 @@ const PostComments = ({ post }: { post: ExtendedPost }) => {
             </Group>
 
             {comments.data?.commentsCount !== 0 && <Pagination
-                total={comments.data?.commentsCount || 0}
+                total={comments.data?.commentsCount as number > 5 ? ((comments.data?.commentsCount as number / 5) + 1) : 0}
                 onChange={setPage}
                 value={page}
             />}

@@ -12,6 +12,7 @@ import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 import { streamToFile, uploadFile } from "@/utils/supabase";
 import { Duplex } from 'stream';
 import { FaCross, FaTrash } from "react-icons/fa";
+import { showNotification } from "@mantine/notifications";
 
 const useStyles = createStyles((theme) => ({
     avatar: {
@@ -58,7 +59,7 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
     });
 
     const onNewPost = async () => {
-        createPost.mutateAsync({
+        await createPost.mutateAsync({
             content: data.content,
             ...data.attachmentId && {
                 attachmentId: data.attachmentId
@@ -69,8 +70,15 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
             attachmentId: "",
             content: ""
         });
-
         setFiles([]);
+
+        showNotification({
+            title: "New post",
+            message: "New post has been successfully created!",
+            autoClose: 3000
+        });
+
+        close();
     }
 
     const onFileRemove = (index: number) => {
