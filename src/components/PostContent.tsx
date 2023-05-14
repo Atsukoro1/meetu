@@ -22,7 +22,7 @@ const PostContent = ({ content }: PostContentProps) => {
     const parts = content.split(/(@\w+|#\w+)/g);
 
     return (
-        <Title order={3} size="sm" weight={"600"} className="table w-[375px]">
+        <Text size="sm" className="table w-[375px]">
             {parts.map((part, index) => {
                 if (part.startsWith('@')) {
                     return (
@@ -45,7 +45,7 @@ const PostContent = ({ content }: PostContentProps) => {
 
                 return part;
             })}
-        </Title>
+        </Text>
     );
 }
 

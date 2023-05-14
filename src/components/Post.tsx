@@ -1,10 +1,14 @@
-import { createStyles, Text, Avatar, Group, Paper, ActionIcon, Popover, HoverCard } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { Attachment, Post, User } from '@prisma/client';
+import { createStyles, Text, Avatar, Group, Paper, ActionIcon, HoverCard, Flex, Modal, Image } from '@mantine/core';
+import { Attachment as AttachmentI, Post, User } from '@prisma/client';
 import moment from 'moment';
-import { FaBookmark, FaRegThumbsDown, FaThumbsUp } from 'react-icons/fa';
-import { ProfileCard, ProfileHighlightCard } from './ProfileCard';
+import { FaRegComment, FaRegThumbsDown, FaRegThumbsUp, FaThumbsDown, FaThumbsUp } from 'react-icons/fa';
+import { ProfileHighlightCard } from './ProfileCard';
 import PostContent from './PostContent';
+import { useState } from 'react';
+import { api } from '@/utils/api';
+import { useDisclosure } from '@mantine/hooks';
+import PostComments from './PostComments';
+import { env } from '@/env.mjs';
 
 const useStyles = createStyles((theme) => ({
     body: {
@@ -14,6 +18,7 @@ const useStyles = createStyles((theme) => ({
 
     border: {
         padding: `${theme.spacing.lg} ${theme.spacing.xl}`,
+        width: "100%"
     },
 
     avatar: {
@@ -30,12 +35,10 @@ const useStyles = createStyles((theme) => ({
         width: '40%'
     },
 
-    action: {
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
-        ...theme.fn.hover({
-            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
-        }),
-    },
+    postImage: {
+        borderRadius: "10px",
+        overflow: "hidden"
+    }
 }));
 
 interface PostSimpleProps {
@@ -46,13 +49,68 @@ export type ExtendedPost = Post & {
     author: User;
     userLiked: boolean;
     userDisliked: boolean;
-    attachment: Attachment | null;
+    attachment: AttachmentI | null;
     likeCount: number;
     dislikeCount: number;
 };
 
 export function PostSimple({ post }: PostSimpleProps) {
+    const toggleInteraction = api.post.toggleInteraction.useMutation();
+    const [modalOpened, { open, close }] = useDisclosure();
+
+    const [reactions, setReactions] = useState({
+        liked: post.userLiked,
+        disliked: post.userDisliked
+    });
+    const [counts, setCounts] = useState({
+        likedCount: post.likeCount,
+        dislikedCount: post.dislikeCount
+    });
+
     const { classes } = useStyles();
+
+    const onInteractionClick = (type: 'DISLIKE' | 'LIKE') => {
+        const localOpposite = type === 'DISLIKE' ? 'liked' : 'disliked';
+        const localExact = type === 'DISLIKE' ? 'disliked' : 'liked';
+
+        if (reactions[localOpposite]) {
+            toggleInteraction.mutate({
+                type: type === 'DISLIKE' ? 'LIKE' : "DISLIKE",
+                postId: post.id
+            });
+        };
+
+        toggleInteraction.mutate({
+            type: type,
+            postId: post.id
+        });
+
+        if (localExact === 'disliked') {
+            setCounts({
+                ...counts,
+                ...reactions.liked && {
+                    likedCount: counts.likedCount - 1
+                },
+                dislikedCount: reactions.disliked ? counts.dislikedCount - 1 : counts.dislikedCount + 1
+            });
+        } else {
+            setCounts({
+                ...counts,
+                ...reactions.disliked && {
+                    dislikedCount: counts.dislikedCount - 1,
+                },
+                likedCount: reactions.liked ? counts.likedCount - 1 : counts.likedCount + 1
+            });
+        }
+
+        setReactions({
+            ...reactions,
+            [localExact]: !reactions[localExact],
+            ...reactions[localOpposite] && {
+                [localOpposite]: false
+            }
+        });
+    }
 
     return (
         <Paper withBorder radius="md" className={classes.border}>
@@ -75,18 +133,38 @@ export function PostSimple({ post }: PostSimpleProps) {
                 </HoverCard.Target>
 
                 <Text className={classes.body} size="sm">
-                    <PostContent content={post.content}/>
+                    <PostContent content={post.content} />
                 </Text>
 
+                {post.attachment && (
+                    <Group spacing={5} mt={2} mb={10}>
+                        <Image
+                            className={classes.postImage}
+                            src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${post.attachmentId}`}
+                            height={140}
+                            fit='cover'
+                            width={200}
+                        />
+                    </Group>
+                )}
+
                 <Group spacing={8} mr={0}>
-                    <ActionIcon className={classes.action}>
-                        <FaThumbsUp size="1rem" />
-                    </ActionIcon>
-                    <ActionIcon className={classes.action}>
-                        <FaRegThumbsDown size="1rem" />
-                    </ActionIcon>
-                    <ActionIcon className={classes.action}>
-                        <FaBookmark size="1rem" />
+                    <Flex>
+                        <ActionIcon variant='transparent' onClick={() => onInteractionClick('LIKE')}>
+                            {reactions.liked ? <FaThumbsUp size="1rem" /> : <FaRegThumbsUp size="1rem" />}
+                        </ActionIcon>
+                        <Text>{counts.likedCount}</Text>
+                    </Flex>
+
+                    <Flex>
+                        <ActionIcon variant='subtle' onClick={() => onInteractionClick('DISLIKE')}>
+                            {reactions.disliked ? <FaThumbsDown size="1rem" /> : <FaRegThumbsDown size="1rem" />}
+                        </ActionIcon>
+                        <Text>{counts.dislikedCount}</Text>
+                    </Flex>
+
+                    <ActionIcon variant='transparent' onClick={open}>
+                        <FaRegComment size="1rem" />
                     </ActionIcon>
                 </Group>
 
@@ -94,6 +172,10 @@ export function PostSimple({ post }: PostSimpleProps) {
                     <ProfileHighlightCard user={post.author} />
                 </HoverCard.Dropdown>
             </HoverCard>
+
+            <Modal opened={modalOpened} onClose={close} title="Post comments">
+                <PostComments post={post} />
+            </Modal>
         </Paper>
     );
 }

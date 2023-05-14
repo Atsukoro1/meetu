@@ -10,34 +10,40 @@ import NotificationLayout from "@/layouts/NotificationLayout";
 import MessageLayout from "@/layouts/MessageLayout";
 import { Tab } from "@/components/Navbar";
 import Tip from "@/components/Tip";
-import { Divider, Group, Title } from "@mantine/core";
-import { FaRetweet } from "react-icons/fa";
+import { Center, Grid, Title, createStyles } from "@mantine/core";
+
+const useStyles = createStyles(() => ({
+    profileTip: {
+        marginTop: "10px"
+    }
+}));
 
 const AppPage = ({
     page,
     recentUsers,
     userWithoutSensitiveData
 }: InferGetServerSidePropsType<typeof getServerSideProps> & { page: Tab }) => {
+    const { classes } = useStyles();
+
     return (
-        <div className="flex h-[93vh]">
-            <div className="w-[30%] ml-3">
+        <Grid>
+            <Grid.Col span={4}>
                 <ProfileHighlight user={userWithoutSensitiveData as ExtendedUser} />
 
-                <Group className="w-fit mx-auto mt-3">
-                    <Tip actionText="to create a new post" keys={["ctrl", "+", "p"]}/>
-                </Group>
-            </div>
-            
-            {page === Tab.EXPLORE && <PostLayout/>}
-            {page === Tab.NOTIFICATIONS && <NotificationLayout/>}
-            {page === Tab.MESSAGES && <MessageLayout/>}
+                <Center className={classes.profileTip}>
+                    <Tip actionText="to create a new post" keys={["ctrl", "+", "p"]} />
+                </Center>
+            </Grid.Col>
 
-            <div className="block w-[25%]">
-            <div className="p-3">
+            <Grid.Col span={4}>
+                {page === Tab.EXPLORE && <PostLayout />}
+                {page === Tab.NOTIFICATIONS && <NotificationLayout />}
+                {page === Tab.MESSAGES && <MessageLayout />}
+            </Grid.Col>
+
+            <Grid.Col span={4}>
                 <div className="flex flex-row gap-2">
                     <Title size="20">Who to follow</Title>
-                    <Divider size="sm" orientation="vertical" />
-                    <FaRetweet className="mt-1.5" color="white"/>
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -47,9 +53,8 @@ const AppPage = ({
                         )
                     })}
                 </div>
-            </div>
-            </div>
-        </div>
+            </Grid.Col>
+        </Grid>
     )
 }
 

@@ -22,6 +22,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       withGlobalStyles 
       withNormalizeCSS
       theme={{
+        primaryColor: 'indigo',
         colorScheme: 'dark',
         colors: {
           dark: [
