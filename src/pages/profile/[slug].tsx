@@ -15,6 +15,7 @@ import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
 import { authOptions } from '@/server/auth';
 import { prisma } from '@/server/db';
 import { User } from '@prisma/client';
+import DOMPurify from 'dompurify';
 
 const useStyles = createStyles((theme) => ({
   card: {
@@ -60,9 +61,11 @@ export function ProfilePage({ user }: { user: User }) {
           </Text>
           <Badge size="sm">{user.age}</Badge>
         </Group>
-        <Text fz="sm" mt="xs">
-          {user.bio}
-        </Text>
+        <Text 
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(user.bio || "") }} 
+          fz="sm" 
+          mt="xs"
+        />
       </Card.Section>
 
       <Card.Section className={classes.section}>

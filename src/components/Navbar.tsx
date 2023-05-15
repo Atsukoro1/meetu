@@ -12,7 +12,8 @@ import {
     rem,
     Flex,
     ActionIcon,
-    useMantineColorScheme
+    useMantineColorScheme,
+    Modal
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -28,6 +29,7 @@ import {
 } from '@tabler/icons-react';
 import { signOut, useSession } from 'next-auth/react';
 import { FaTwitter } from 'react-icons/fa';
+import SettingsModal from './SettingsModal';
 
 const useStyles = createStyles((theme) => ({
     header: {
@@ -107,6 +109,7 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
     const { data } = useSession();
     const { classes, theme, cx } = useStyles();
     const [opened, { toggle }] = useDisclosure(false);
+    const [settingsOpened, { open, close }] = useDisclosure();
     const [userMenuOpened, setUserMenuOpened] = useState(false);
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
     const dark = colorScheme === 'dark';
@@ -127,7 +130,6 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
                         <ActionIcon
                          size="xl"
                             variant="outline"
-                            color={dark ? 'yellow' : 'blue'}
                             onClick={() => toggleColorScheme()}
                             title="Toggle color scheme"
                         >
@@ -173,7 +175,7 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
                                 </Menu.Item>
 
                                 <Menu.Label>Settings</Menu.Label>
-                                <Menu.Item icon={<IconSettings size="0.9rem" stroke={1.5} />}>
+                                <Menu.Item onClick={open} icon={<IconSettings size="0.9rem" stroke={1.5} />}>
                                     Account settings
                                 </Menu.Item>
                                 <Menu.Item icon={<IconSwitchHorizontal size="0.9rem" stroke={1.5} />}>
@@ -217,6 +219,10 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
                     </Tabs.List>
                 </Tabs>
             </Container>
+
+            <Modal title="Settings" opened={settingsOpened} onClose={close}>
+                <SettingsModal/>
+            </Modal>
         </div>
     );
 }

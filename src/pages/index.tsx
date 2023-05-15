@@ -3,8 +3,9 @@ import ProviderButton from "@/components/ProviderButton";
 import { getServerSession } from "next-auth/next";
 import { getProviders } from "next-auth/react";
 import { authOptions } from "@/server/auth";
-import { MessagePlaceholder } from "@/components/Message";
-import { createStyles, Title, Text, Button, Container, rem } from '@mantine/core';
+import Features from '@/components/Features';
+import Footer from "@/components/Footer";
+import { createStyles, Title, Text, Button, Container, rem, Box } from '@mantine/core';
 import { DiscordButton, GithubButton, GoogleButton } from "@/components/SocialButtons";
 
 const useStyles = createStyles((theme) => ({
@@ -120,6 +121,12 @@ export default function SignIn({ providers }: InferGetServerSidePropsType<typeof
           <GithubButton/>
         </div>
       </div>
+
+      <Box mt={180} mb={180}>
+        <Features/>
+      </Box>
+
+      <Footer links={[{ link: "https://google.com", label: "Privacy policy" }]}/>
     </Container>
   );
 }

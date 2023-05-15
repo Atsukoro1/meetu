@@ -14,6 +14,7 @@ import { prisma } from '@/server/db';
 import { uploadFile } from '@/utils/supabase';
 import { useSession } from 'next-auth/react';
 import { env } from '@/env.mjs';
+import { Button, Select, Slider, Stepper, Text, Textarea, Title } from '@mantine/core';
 
 interface StepOneResult {
     age: number;
@@ -48,60 +49,55 @@ const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
 
     return (
         <div className="mt-2">
-            <h2 className="text-2xl font-bold mb-1 mt-4">Welcome</h2>
-            <p className="table w-[400px] mb-4">We're so glad to welcome a new member here, let's start by filling some basics about you.</p>
+            <Title>Welcome</Title>
+            <Text>
+                We're so glad to welcome a new member here,
+                let's start by filling some basics about you.
+            </Text>
 
-            <label>Age</label>
-            <div className="flex gap-3 mb-4 mt-2">
-                <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    onChange={(e) => {
-                        setData({
-                            ...data,
-                            age: parseInt(e.target.value)
-                        })
-                    }}
-                    value={data.age}
-                    className="range range-primary"
-                />
+            <Text size="sm">Age</Text>
+            <Slider
+                placeholder='Age'
+                min={0}
+                max={100}
+                label={`Your age: ${data.age}`}
+                onChange={(value) => {
+                    setData({
+                        ...data,
+                        age: value
+                    })
+                }}
+                value={data.age}
+            />
 
-                <label>{data.age.toString()}</label>
-            </div>
+            <Textarea
+                label="Bio"
+                className="textarea textarea-primary w-full"
+                placeholder="Some short text about you..."
+                value={data.bio}
+                onChange={(e) => {
+                    setData({
+                        ...data,
+                        bio: e.target.value
+                    })
+                }}
+            />
 
-            <label>Bio</label>
-            <div className="mt-2 mb-4">
-                <textarea
-                    className="textarea textarea-primary w-full"
-                    placeholder="Some short text about you..."
-                    value={data.bio}
-                    onChange={(e) => {
-                        setData({
-                            ...data,
-                            bio: e.target.value
-                        })
-                    }}
-                />
-            </div>
-
-            <label>Gender</label>
             <div className="form-control mb-2">
-                <label className="label cursor-pointer w-fit gap-2">
-                    <span className="label-text">Male</span>
-                    <input 
-                        type="checkbox" 
-                        className="toggle toggle-primary" 
-                        checked={data.gender === Gender.MALE} 
-                        onChange={() => {
-                            setData({
-                                ...data,
-                                gender: data.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE
-                            })
-                        }}
-                    />
-                    <span className="label-text">Female</span>
-                </label>
+                <Select
+                    label="Your gender"
+                    value={data.gender}
+                    data={[
+                        { value: Gender.FEMALE, label: "Female" },
+                        { value: Gender.MALE, label: "Male" }
+                    ]}
+                    onChange={(value) => {
+                        setData({
+                            ...data,
+                            gender: value as Gender
+                        });
+                    }}
+                />
             </div>
         </div>
     )
@@ -284,13 +280,13 @@ const StepThree = ({ onResult }: { onResult: (data: StepThreeResult) => void }) 
                     maxFiles={1}
                     name="files"
                     onaddfile={async (error, file) => {
-                        if(error) return;
+                        if (error) return;
 
-                        if(await uploadFile(
-                            `pfps/${data?.user.id}`, 
+                        if (await uploadFile(
+                            `pfps/${data?.user.id}`,
                             new File([file.file], file.file.name, {
                                 type: file.file.type,
-                            }), 
+                            }),
                             "test"
                         )) {
                             setResult({
@@ -310,13 +306,13 @@ const StepThree = ({ onResult }: { onResult: (data: StepThreeResult) => void }) 
                     maxFiles={1}
                     name="files"
                     onaddfile={async (error, file) => {
-                        if(error) return;
+                        if (error) return;
 
-                        if(await uploadFile(
-                            `banner/${data?.user.id}`, 
+                        if (await uploadFile(
+                            `banner/${data?.user.id}`,
                             new File([file.file], file.file.name, {
                                 type: file.file.type,
-                            }), 
+                            }),
                             "test"
                         )) {
                             setResult({
@@ -335,13 +331,15 @@ const StepThree = ({ onResult }: { onResult: (data: StepThreeResult) => void }) 
 const StepFour = () => {
     return (
         <div className="mt-2">
-            <h2 className="text-2xl font-bold mb-1 mt-4">Well done!</h2>
+            <Title>Well done!</Title>
             <p className="table w-[400px] mb-4">You're now ready to explore the MEETU network!</p>
         </div>
     )
 }
 
 const SetupPage = () => {
+    const [active, setActive] = useState(1);
+    const [highestStepVisited, setHighestStepVisited] = useState(active);
     const [stepOneResult, setStepOneResult] = useState<StepOneResult>();
     const [stepTwoResult, setStepTwoResult] = useState<StepTwoResult>();
     const [stepThreeResult, setStepThreeResult] = useState<StepThreeResult>();
@@ -358,7 +356,7 @@ const SetupPage = () => {
             case 2:
                 updateUser.mutateAsync(stepTwoResult as any)
                 break;
-            case 3: 
+            case 3:
                 updateUser.mutateAsync(stepThreeResult as any);
                 break;
             case 4:
@@ -385,32 +383,52 @@ const SetupPage = () => {
             }} />
             case 3: return <StepThree onResult={(data) => {
                 setStepThreeResult(data);
-            }}/>
+            }} />
             case 4: return <StepFour />
         }
     }
 
+    const handleStepChange = (nextStep: number) => {
+        const isOutOfBounds = nextStep > 3 || nextStep < 0;
+
+        if (isOutOfBounds) {
+            return;
+        }
+
+        setActive(nextStep);
+        setHighestStepVisited((hSC) => Math.max(hSC, nextStep));
+    };
+
+    // Allow the user to freely go back and forth between visited steps.
+    const shouldAllowSelectStep = (step: number) => highestStepVisited >= step && active !== step;
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen">
             <div className="card-normal bg-neutral rounded-xl p-8">
-                <div className="mb-2">
-                    <ul className="steps">
-                        <li className={`step ${page >= 1 && "step-primary"}`}>Basic info!</li>
-                        <li className={`step ${page >= 2 && "step-primary"}`}>More about you</li>
-                        <li className={`step ${page >= 3 && "step-primary"}`}>Graphics</li>
-                        <li className={`step ${page >= 4 && "step-primary"}`}>Done!</li>
-                    </ul>
-                </div>
+                <Stepper active={active} onStepClick={setActive} breakpoint="sm">
+                    <Stepper.Step
+                        label="Basic information"
+                        description="Provide some basics about you"
+                        allowStepSelect={shouldAllowSelectStep(0)}
+                    />
+                    <Stepper.Step
+                        label="Second step"
+                        description="Verify email"
+                        allowStepSelect={shouldAllowSelectStep(1)}
+                    />
+                    <Stepper.Step
+                        label="Final step"
+                        description="Get full access"
+                        allowStepSelect={shouldAllowSelectStep(2)}
+                    />
+                </Stepper>
 
                 <div className="mt-2">
                     {renderPage()}
 
-                    <button
-                        className="btn btn-active btn-primary mt-3"
-                        onClick={incrementPage}
-                    >
+                    <Button onClick={incrementPage}>
                         Continue
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
