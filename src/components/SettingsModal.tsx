@@ -4,9 +4,20 @@ import { useForm } from '@mantine/form';
 import { useSession } from "next-auth/react";
 import { api } from "@/utils/api";
 import Wysiwyg from '@/components/Wysiwyg';
+import { showNotification } from "@mantine/notifications";
 
-const SettingsModal = () => {
-    const editUser = api.user.updateUser.useMutation();
+const SettingsModal = ({ onClose }: { onClose: () => void; }) => {
+    const editUser = api.user.updateUser.useMutation({
+        onSuccess: () => {
+            showNotification({
+                message: "Profile edit",
+                title: "Succefully edited your profile"
+            });
+
+            onClose();
+        }
+    });
+
     const me = api.user.getMyself.useQuery();
 
     const form = useForm({
@@ -40,7 +51,6 @@ const SettingsModal = () => {
 
                 <Box mt={10}>
                     <Text size="sm">Bio</Text>
-                    {me.data?.bio && (
                         <Wysiwyg
                             onContentChange={(content) => {
                                 form.setValues({
@@ -48,13 +58,17 @@ const SettingsModal = () => {
                                     bio: content
                                 });
                             }}
-                            content={me.data.bio}
+                            content={me.data?.bio || ""}
                         />
-                    )}
                 </Box>
 
 
-                <Button type="submit" mt={20} variant="filled" onClick={() => { }}>
+                <Button 
+                    loading={editUser.isLoading} 
+                    type="submit" 
+                    mt={20} 
+                    variant="filled"
+                >
                     Modify
                 </Button>
             </form>

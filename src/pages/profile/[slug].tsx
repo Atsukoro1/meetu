@@ -14,8 +14,9 @@ import { getServerSession } from 'next-auth';
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
 import { authOptions } from '@/server/auth';
 import { prisma } from '@/server/db';
-import { User } from '@prisma/client';
+import { Social, User } from '@prisma/client';
 import DOMPurify from 'dompurify';
+import Link from 'next/link';
 
 const useStyles = createStyles((theme) => ({
   card: {
@@ -45,7 +46,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 
-export function ProfilePage({ user }: { user: User }) {
+export function ProfilePage({ user }: { user: User & { socials: Social[] } }) {
   const { classes } = useStyles();
 
   return (
@@ -59,8 +60,9 @@ export function ProfilePage({ user }: { user: User }) {
           <Text fz="lg" fw={500}>
             {user.name}
           </Text>
-          <Badge size="sm">{user.age}</Badge>
+          <Badge size="sm">FEMALE {user.age}</Badge>
         </Group>
+
         <Text 
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(user.bio || "") }} 
           fz="sm" 
@@ -70,20 +72,36 @@ export function ProfilePage({ user }: { user: User }) {
 
       <Card.Section className={classes.section}>
         <Text mt="md" className={classes.label} c="dimmed">
-          Perfect for you, if you enjoy
+          Hobbies
         </Text>
+
         <Group spacing={7} mt={5}>
-          {/* {features} */}
+          {user.hobbies.map(el => {
+            return <Badge key={el}>{el}</Badge>
+          })}
+        </Group>
+      </Card.Section>
+
+      <Card.Section className={classes.section}>
+        <Text mt="md" className={classes.label} c="dimmed">
+          Socials
+        </Text>
+
+        <Group spacing={7} mt={5}>
+          {user.socials.map(el => {
+            return <Link href={el.url}><Badge>{el.text}</Badge></Link>
+          })}
         </Group>
       </Card.Section>
 
       <Group mt="xs">
-        <Button radius="md" style={{ flex: 1 }}>
-          Show details
+        <Button variant='filled' radius="md" style={{ flex: 1 }}>
+          Follow
         </Button>
-        <ActionIcon variant="default" radius="md" size={36}>
-          <IconHeart size="1.1rem" className={classes.like} stroke={1.5} />
-        </ActionIcon>
+        
+        <Button variant="filled" radius="md" style={{ flex: 1 }}>
+          Start conversation
+        </Button>
       </Group>
     </Card>
   );

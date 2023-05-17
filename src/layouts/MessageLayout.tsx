@@ -1,14 +1,10 @@
-import { AiOutlineSend } from 'react-icons/ai';
 import { useEffect, useState } from "react";
-import InfiniteScroll from "react-infinite-scroller";
-import Skeleton from "@/components/Skeleton";
 import { Message } from "@/components/Message";
 import { NotificationType, User, Message as MessageType } from "@prisma/client";
 import { api } from "@/utils/api";
 import { useAtom } from 'jotai';
 import { NotificationPoolAtom } from '@/atoms/NotificationPoolAtom';
-import Tip from '@/components/Tip';
-import { Avatar, Box, Button, Grid, Group, Text, Input, Paper, UnstyledButton, createStyles, Title, Flex, ScrollArea } from '@mantine/core';
+import { Avatar, Button, Grid, Group, Text, Input, UnstyledButton, createStyles, Title, Flex, ScrollArea, Badge } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
 import { useSession } from 'next-auth/react';
 import { FaPaperPlane } from 'react-icons/fa';
@@ -32,7 +28,8 @@ const useStyles = createStyles((theme) => ({
 
     messageContainer: {
         flex: 1,
-        flexDirection: "column"
+        flexDirection: "column",
+        background: "rgba(186, 186, 186, .1)"
     }
 }));
 
@@ -58,7 +55,7 @@ const MessageLayout = () => {
         }
     });
 
-    const messages = api.conversation.fetchMesssages.useQuery({
+    api.conversation.fetchMesssages.useQuery({
         page: page,
         perPage: 10,
         conversationId: selected
@@ -85,10 +82,13 @@ const MessageLayout = () => {
         notifications.forEach(notification => {
             if (notification.type === NotificationType.MESSAGE) {
                 const message = notification.data as MessageType;
+
                 if (message.conversationId === selected) {
                     const copied = [...cached];
+
                     let index = copied.findIndex(msg => msg.createdAt > message.createdAt);
                     if (index === -1) index = copied.length;
+
                     // @ts-ignore
                     copied.splice(index, 0, { ...message, author: message.author });
                     setCached(copied);
@@ -117,7 +117,7 @@ const MessageLayout = () => {
                 <Grid.Col className={classes.contentGrid} span={4}>
                     <Title mb={5} size="lg">Your conversations</Title>
 
-                    {conversations.data?.map(el => {
+                    {conversations.data?.length !== 0 ? (conversations.data?.map(el => {
                         return (
                             <UnstyledButton onClick={() => setSelected(el.id)} className={classes.user}>
                                 <Group>
@@ -137,7 +137,9 @@ const MessageLayout = () => {
                                 </Group>
                             </UnstyledButton>
                         )
-                    })}
+                    })) : (
+                        <Badge>No conversations</Badge>
+                    )}
                 </Grid.Col>
 
                 <Grid.Col className={classes.contentGrid} span={8}>
@@ -154,6 +156,7 @@ const MessageLayout = () => {
 
                     <Flex gap={10} mt={20} align="bottom">
                         <Input
+                            disabled={selected === ""}
                             w={"100%"}
                             placeholder='Your new message...'
                             onKeyDown={(e) => {
@@ -166,6 +169,7 @@ const MessageLayout = () => {
                         />
 
                         <Button 
+                            disabled={selected === ""}
                             rightIcon={<FaPaperPlane/>}
                             onClick={handleNewMessage}
                         >

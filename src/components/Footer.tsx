@@ -47,7 +47,6 @@ const Footer = ({ links }: FooterSimpleProps) => {
     return (
         <div className={classes.footer}>
             <Container className={classes.inner}>
-                <MantineLogo size={28} />
                 <Group className={classes.links}>{items}</Group>
             </Container>
         </div>

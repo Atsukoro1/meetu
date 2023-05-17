@@ -20,7 +20,7 @@ export function UserCardImage({ user }: UserCardImageProps) {
 
     return (
         <Card withBorder padding="md" radius="md" className={classes.card}>
-            <Card.Section sx={{ backgroundImage: `url(${user.image})`, height: 140 }} />
+            {user.banner ? <Card.Section sx={{ backgroundImage: `url(${user.banner})`, backgroundRepeat: 'no-repeat', height: 140 }} /> : <Card.Section sx={{ backgroundImage: `url(${user.image})`, height: 140 }} />}
             <Avatar src={user.image} size={80} radius={80} mx="auto" mt={-30} className={classes.avatar} />
             <Text ta="center" fz="lg" fw={500} mt="sm">
                 {user.name}

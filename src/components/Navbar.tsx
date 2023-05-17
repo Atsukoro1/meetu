@@ -30,6 +30,7 @@ import {
 import { signOut, useSession } from 'next-auth/react';
 import { FaTwitter } from 'react-icons/fa';
 import SettingsModal from './SettingsModal';
+import { useRouter } from 'next/router';
 
 const useStyles = createStyles((theme) => ({
     header: {
@@ -113,6 +114,7 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
     const [userMenuOpened, setUserMenuOpened] = useState(false);
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
     const dark = colorScheme === 'dark';
+    const router = useRouter();
 
     return (
         <div className={classes.header}>
@@ -128,7 +130,7 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
 
                     <Flex gap={20}>
                         <ActionIcon
-                         size="xl"
+                            size="xl"
                             variant="outline"
                             onClick={() => toggleColorScheme()}
                             title="Toggle color scheme"
@@ -194,34 +196,36 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
             </Container>
 
             <Container>
-                <Tabs
-                    defaultValue="Home"
-                    variant="outline"
-                    onTabChange={onTabSelect}
-                    classNames={{
-                        root: classes.tabs,
-                        tabsList: classes.tabsList,
-                        tab: classes.tab,
-                    }}
-                >
-                    <Tabs.List>
-                        <Tabs.Tab value={Tab.EXPLORE} key={"Explore"}>
-                            Explore
-                        </Tabs.Tab>
+                {router.pathname === '/app' && (
+                    <Tabs
+                        defaultValue="Home"
+                        variant="outline"
+                        onTabChange={onTabSelect}
+                        classNames={{
+                            root: classes.tabs,
+                            tabsList: classes.tabsList,
+                            tab: classes.tab,
+                        }}
+                    >
+                        <Tabs.List>
+                            <Tabs.Tab value={Tab.EXPLORE} key={"Explore"}>
+                                Explore
+                            </Tabs.Tab>
 
-                        <Tabs.Tab value={Tab.MESSAGES} key={"Messages"}>
-                            Messages
-                        </Tabs.Tab>
+                            <Tabs.Tab value={Tab.MESSAGES} key={"Messages"}>
+                                Messages
+                            </Tabs.Tab>
 
-                        <Tabs.Tab value={Tab.NOTIFICATIONS} key={"Notifications"}>
-                            Notifications
-                        </Tabs.Tab>
-                    </Tabs.List>
-                </Tabs>
+                            <Tabs.Tab value={Tab.NOTIFICATIONS} key={"Notifications"}>
+                                Notifications
+                            </Tabs.Tab>
+                        </Tabs.List>
+                    </Tabs>
+                )}
             </Container>
 
             <Modal title="Settings" opened={settingsOpened} onClose={close}>
-                <SettingsModal/>
+                <SettingsModal onClose={close}/>
             </Modal>
         </div>
     );
