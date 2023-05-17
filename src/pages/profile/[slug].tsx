@@ -15,7 +15,6 @@ import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
 import { authOptions } from '@/server/auth';
 import { prisma } from '@/server/db';
 import { Social, User } from '@prisma/client';
-import DOMPurify from 'dompurify';
 import Link from 'next/link';
 
 const useStyles = createStyles((theme) => ({
@@ -64,7 +63,7 @@ export function ProfilePage({ user }: { user: User & { socials: Social[] } }) {
         </Group>
 
         <Text 
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(user.bio || "") }} 
+          dangerouslySetInnerHTML={{ __html: user.bio || "" }} 
           fz="sm" 
           mt="xs"
         />
@@ -98,7 +97,7 @@ export function ProfilePage({ user }: { user: User & { socials: Social[] } }) {
         <Button variant='filled' radius="md" style={{ flex: 1 }}>
           Follow
         </Button>
-        
+
         <Button variant="filled" radius="md" style={{ flex: 1 }}>
           Start conversation
         </Button>

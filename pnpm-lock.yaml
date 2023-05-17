@@ -94,9 +94,6 @@ dependencies:
   '@trpc/server':
     specifier: ^10.18.0
     version: 10.18.0
-  dompurify:
-    specifier: ^3.0.3
-    version: 3.0.3
   filepond:
     specifier: ^4.30.4
     version: 4.30.4
@@ -2525,10 +2522,6 @@ packages:
     dependencies:
       '@babel/runtime': 7.21.0
       csstype: 3.1.2
-    dev: false
-
-  /dompurify@3.0.3:
-    resolution: {integrity: sha512-axQ9zieHLnAnHh0sfAamKYiqXMJAVwu+LM/alQ7WDagoWessyWvMSFyW65CqF3owufNu8HBcE4cM2Vflu7YWcQ==}
     dev: false
 
   /electron-to-chromium@1.4.361:
