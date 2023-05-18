@@ -31,6 +31,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { FaTwitter } from 'react-icons/fa';
 import SettingsModal from './SettingsModal';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 const useStyles = createStyles((theme) => ({
     header: {
@@ -120,10 +121,12 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
         <div className={classes.header}>
             <Container className={classes.mainSection}>
                 <Group position="apart">
-                    <Flex>
-                        <FaTwitter color={theme.colorScheme[1]} size={30} />
-                        <Text weight={900} color={theme.colorScheme[0]} ml={4}>Crazy</Text>
-                    </Flex>
+                    <Link href={'/'}>
+                        <Flex>
+                            <FaTwitter color={theme.colorScheme[1]} size={30} />
+                            <Text weight={900} color={theme.colorScheme[0]} ml={4}>Crazy</Text>
+                        </Flex>
+                    </Link>
 
 
                     <Burger opened={opened} onClick={toggle} className={classes.burger} size="sm" />

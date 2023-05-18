@@ -11,7 +11,7 @@ import {
   rem,
 } from '@mantine/core';
 import { getServerSession } from 'next-auth';
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
+import { GetServerSidePropsContext } from 'next';
 import { authOptions } from '@/server/auth';
 import { prisma } from '@/server/db';
 import { Social, User } from '@prisma/client';
@@ -103,44 +103,46 @@ export function ProfilePage({ user, isFollowing, isConversation }: { user: User 
         </Group>
       </Card.Section>
 
-      <Group mt="xs">
-        <Button
-          variant={follow ? "outline" : "filled"}
-          radius="md"
-          loading={followUser.isLoading || unfollowUser.isLoading}
-          onClick={async () => {
-            if (isFollowing) {
-              await unfollowUser.mutateAsync(user.id);
-              setFollow(false);
-            } else {
-              await followUser.mutateAsync(user.id);
-              setFollow(true);
-            }
-          }}
-          style={{ flex: 1 }}
-        >
-          {follow ? "Unfollow" : "Follow"}
-        </Button>
-
-        {!conversation && (
+      {(session.data?.user.id !== user.id) && (
+        <Group mt="xs">
           <Button
-            variant="filled"
+            variant={follow ? "outline" : "filled"}
             radius="md"
-            loading={createConversation.isLoading}
+            loading={followUser.isLoading || unfollowUser.isLoading}
             onClick={async () => {
+              if (isFollowing) {
+                await unfollowUser.mutateAsync(user.id);
+                setFollow(false);
+              } else {
+                await followUser.mutateAsync(user.id);
+                setFollow(true);
+              }
+            }}
+            style={{ flex: 1 }}
+          >
+            {follow ? "Unfollow" : "Follow"}
+          </Button>
+
+          {!conversation && (
+            <Button
+              variant="filled"
+              radius="md"
+              loading={createConversation.isLoading}
+              onClick={async () => {
                 await createConversation.mutateAsync({
                   userIds: [user.id, session.data?.user.id || ""],
                   title: "New conversation"
                 });
 
                 setConversation(true);
-            }}
-            style={{ flex: 1 }}
-          >
-            Start conversation
-          </Button>
-        )}
-      </Group>
+              }}
+              style={{ flex: 1 }}
+            >
+              Start conversation
+            </Button>
+          )}
+        </Group>
+      )}
     </Card>
   );
 }
