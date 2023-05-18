@@ -17,21 +17,16 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-    IconLogout,
-    IconHeart,
-    IconStar,
-    IconMessage,
-    IconSettings,
-    IconSwitchHorizontal,
-    IconChevronDown,
     IconSun,
     IconMoonStars
 } from '@tabler/icons-react';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { FaTwitter } from 'react-icons/fa';
 import SettingsModal from './SettingsModal';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import NotificationsMenu from './NotificationsMenu';
+import UserMenu from './UserMenu';
 
 const useStyles = createStyles((theme) => ({
     header: {
@@ -109,10 +104,8 @@ export enum Tab {
 
 const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
     const { data } = useSession();
-    const { classes, theme, cx } = useStyles();
+    const { classes, theme } = useStyles();
     const [opened, { toggle }] = useDisclosure(false);
-    const [settingsOpened, { open, close }] = useDisclosure();
-    const [userMenuOpened, setUserMenuOpened] = useState(false);
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
     const dark = colorScheme === 'dark';
     const router = useRouter();
@@ -121,8 +114,8 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
         <div className={classes.header}>
             <Container className={classes.mainSection}>
                 <Group position="apart">
-                    <Link href={'/'}>
-                        <Flex>
+                    <Link style={{ textDecoration: "none", color: theme.colorScheme === 'dark' ? 'white' : "black" }} href="/">
+                        <Flex display="flex">
                             <FaTwitter color={theme.colorScheme[1]} size={30} />
                             <Text weight={900} color={theme.colorScheme[0]} ml={4}>Crazy</Text>
                         </Flex>
@@ -131,51 +124,21 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
 
                     <Burger opened={opened} onClick={toggle} className={classes.burger} size="sm" />
 
-                    <Flex gap={20}>
+                    <Group spacing={30}>
                         <ActionIcon
                             size="xl"
-                            variant="outline"
+                            variant="filled"
                             onClick={() => toggleColorScheme()}
                             title="Toggle color scheme"
                         >
                             {dark ? <IconSun size="1.1rem" /> : <IconMoonStars size="1.1rem" />}
                         </ActionIcon>
 
-                        <Menu
-                            width={260}
-                            position="bottom-end"
-                            transitionProps={{ transition: 'pop-top-right' }}
-                            onClose={() => setUserMenuOpened(false)}
-                            onOpen={() => setUserMenuOpened(true)}
-                            withinPortal
-                        >
-                            <Menu.Target>
-                                <UnstyledButton
-                                    className={cx(classes.user, { [classes.userActive]: userMenuOpened })}
-                                >
-                                    <Group spacing={7}>
-                                        <Avatar src={data?.user.image} alt={data?.user.name || ""} radius="xl" size={20} />
-                                        <Text weight={500} size="sm" sx={{ lineHeight: 1 }} mr={3}>
-                                            {data?.user.name}
-                                        </Text>
-                                        <IconChevronDown size={rem(12)} stroke={1.5} />
-                                    </Group>
-                                </UnstyledButton>
-                            </Menu.Target>
-                            <Menu.Dropdown>
-                                <Menu.Label>Settings</Menu.Label>
-                                <Menu.Item onClick={open} icon={<IconSettings size="0.9rem" stroke={1.5} />}>
-                                    Account settings
-                                </Menu.Item>
-                                <Menu.Item
-                                    onClick={() => signOut()}
-                                    icon={<IconLogout size="0.9rem" stroke={1.5} />
-                                    }>
-                                    Logout
-                                </Menu.Item>
-                            </Menu.Dropdown>
-                        </Menu>
-                    </Flex>
+                        <Flex gap={10}>
+                            <UserMenu />
+                            <NotificationsMenu />
+                        </Flex>
+                    </Group>
                 </Group>
             </Container>
 
@@ -199,18 +162,10 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
                             <Tabs.Tab value={Tab.MESSAGES} key={"Messages"}>
                                 Messages
                             </Tabs.Tab>
-
-                            <Tabs.Tab value={Tab.NOTIFICATIONS} key={"Notifications"}>
-                                Notifications
-                            </Tabs.Tab>
                         </Tabs.List>
                     </Tabs>
                 )}
             </Container>
-
-            <Modal title="Settings" opened={settingsOpened} onClose={close}>
-                <SettingsModal onClose={close}/>
-            </Modal>
         </div>
     );
 }

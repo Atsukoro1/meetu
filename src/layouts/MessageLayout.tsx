@@ -55,7 +55,7 @@ const MessageLayout = () => {
         }
     });
 
-    api.conversation.fetchMesssages.useQuery({
+    const fetched = api.conversation.fetchMesssages.useQuery({
         page: page,
         perPage: 10,
         conversationId: selected
@@ -152,9 +152,22 @@ const MessageLayout = () => {
                                 />
                             )
                         })}
+
+                        {fetched.data?.hasMore && (
+                            <Button 
+                                variant="outline"
+                                sx={{ margin: "10px" }}
+                                onClick={() => {
+                                    setPage(page + 1);
+                                }}
+                                loading={fetched.isLoading}
+                            >
+                                Load more messages
+                            </Button>
+                        )}
                     </ScrollArea>
 
-                    <Flex gap={10} mt={20} align="bottom">
+                    <Flex gap={10} mt={20} align="bottom" p={5}>
                         <Input
                             disabled={selected === ""}
                             w={"100%"}

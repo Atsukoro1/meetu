@@ -5,7 +5,7 @@ import { useState } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 import { Post as PostI, User } from "@prisma/client";
 import { api } from "@/utils/api";
-import { Center, Grid, Group, ScrollArea, Title, createStyles } from "@mantine/core";
+import { Box, Button, Center, Grid, Group, ScrollArea, Title, createStyles } from "@mantine/core";
 import { ProfileCard } from "@/components/ProfileCard";
 import ProfileHighlight, { ExtendedUser } from "@/components/ProfileHighlight";
 import Tip from "@/components/Tip";
@@ -64,33 +64,29 @@ const PostLayout = ({ recentUsers, userWithoutSensitiveData }: { recentUsers: Us
             <Grid.Col span={4}>
                 <PostInput onCreate={(data) => onNewPost(data)} />
 
-                <ScrollArea h={"80vh"}>
-                    <InfiniteScroll
-                        pageStart={0}
-                        loadMore={() => {
-                            setCurrentPage(currentPage + 1);
-                        }}
-                        hasMore={posts.data?.hasMore}
-                        loader={
-                            <div className="gap-4 flex flex-col">
-                                <Skeleton height="120px" width="100%" />
-                                <Skeleton height="120px" width="100%" />
-                                <Skeleton height="120px" width="100%" />
-                            </div>
-                        }
-                        useWindow={false}
-                    >
-                        <Group className={classes.cardsContainer}>
-                            {cachedPosts.map((el: any) => {
-                                return (
-                                    <Post
-                                        post={el}
-                                        key={el.id}
-                                    />
-                                )
-                            })}
-                        </Group>
-                    </InfiniteScroll>
+                <ScrollArea sx={{ gap: 10 }} h={"80vh"} className={classes.cardsContainer}>
+                    {cachedPosts.map((el: any) => {
+                        return (
+                            <Box mb={10}>
+                                <Post
+                                    post={el}
+                                    key={el.id}
+                                />
+                            </Box>
+                        )
+                    })}
+
+                    {posts.data?.hasMore && (
+                        <Button
+                            mb={20}
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            variant="outline"
+                            loading={posts.isLoading}
+                            w={"100%"}
+                        >
+                            Load more posts
+                        </Button>
+                    )}
                 </ScrollArea>
             </Grid.Col>
 

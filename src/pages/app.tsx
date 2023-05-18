@@ -3,7 +3,6 @@ import { authOptions } from "@/server/auth";
 import { prisma } from "@/server/db";
 import { getServerSession } from "next-auth";
 import PostLayout from "@/layouts/PostLayout";
-import NotificationLayout from "@/layouts/NotificationLayout";
 import MessageLayout from "@/layouts/MessageLayout";
 import { Tab } from "@/components/Navbar";
 
@@ -15,9 +14,6 @@ const AppPage = ({
     switch(page) {
         case Tab.EXPLORE: 
             return <PostLayout recentUsers={recentUsers} userWithoutSensitiveData={userWithoutSensitiveData} />;
-
-        case Tab.NOTIFICATIONS:
-            return <NotificationLayout />;
 
         case Tab.MESSAGES:
             return <MessageLayout />;

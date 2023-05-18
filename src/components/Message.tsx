@@ -16,8 +16,8 @@ const useStyles = createStyles((theme) => ({
         clear: "both",
         alignSelf: "end",
         paddingBottom: 20,
-        marginRight: "20px"
-    },
+    padding: 10
+},
 
     createdDate: {
         paddingLeft: rem(5)
@@ -26,7 +26,8 @@ const useStyles = createStyles((theme) => ({
     recipientBox: {
         float: "left",
         clear: "both",
-        paddingBottom: 20
+        paddingBottom: 20,
+        padding: 10
     },
 
     content: {

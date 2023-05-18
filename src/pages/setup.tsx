@@ -324,7 +324,7 @@ const StepThree = ({ onResult }: { onResult: (data: StepThreeResult) => void }) 
 
 const SetupPage = () => {
     const [active, setActive] = useState(1);
-    const [highestStepVisited, setHighestStepVisited] = useState(active);
+    const [highestStepVisited, _] = useState(active);
     const [stepOneResult, setStepOneResult] = useState<StepOneResult>();
     const [stepTwoResult, setStepTwoResult] = useState<StepTwoResult>();
     const [stepThreeResult, setStepThreeResult] = useState<StepThreeResult>();
