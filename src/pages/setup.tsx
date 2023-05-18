@@ -14,7 +14,20 @@ import { prisma } from '@/server/db';
 import { uploadFile } from '@/utils/supabase';
 import { useSession } from 'next-auth/react';
 import { env } from '@/env.mjs';
-import { Button, Select, Slider, Stepper, Text, Textarea, Title } from '@mantine/core';
+import {
+    Badge,
+    Box,
+    Button,
+    Flex,
+    Input,
+    NumberInput,
+    Paper,
+    Select,
+    Stepper,
+    Text,
+    Textarea
+} from '@mantine/core';
+import { FaTrash } from 'react-icons/fa';
 
 interface StepOneResult {
     age: number;
@@ -40,7 +53,6 @@ const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
     });
 
     useEffect(() => {
-
         onResult({
             ...data,
             gender: data.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE
@@ -49,28 +61,24 @@ const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
 
     return (
         <div className="mt-2">
-            <Title>Welcome</Title>
-            <Text>
-                We're so glad to welcome a new member here,
-                let's start by filling some basics about you.
-            </Text>
-
-            <Text size="sm">Age</Text>
-            <Slider
+            <NumberInput
                 placeholder='Age'
                 min={0}
                 max={100}
-                label={`Your age: ${data.age}`}
+                label={`Your age`}
                 onChange={(value) => {
+                    if (typeof value === 'string') return;
+
                     setData({
                         ...data,
-                        age: value
-                    })
+                        age: value as number
+                    });
                 }}
                 value={data.age}
             />
 
             <Textarea
+                mt={10}
                 label="Bio"
                 className="textarea textarea-primary w-full"
                 placeholder="Some short text about you..."
@@ -83,22 +91,21 @@ const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
                 }}
             />
 
-            <div className="form-control mb-2">
-                <Select
-                    label="Your gender"
-                    value={data.gender}
-                    data={[
-                        { value: Gender.FEMALE, label: "Female" },
-                        { value: Gender.MALE, label: "Male" }
-                    ]}
-                    onChange={(value) => {
-                        setData({
-                            ...data,
-                            gender: value as Gender
-                        });
-                    }}
-                />
-            </div>
+            <Select
+                mt={10}
+                label="Your gender"
+                value={data.gender}
+                data={[
+                    { value: Gender.FEMALE, label: "Female" },
+                    { value: Gender.MALE, label: "Male" }
+                ]}
+                onChange={(value) => {
+                    setData({
+                        ...data,
+                        gender: value as Gender
+                    });
+                }}
+            />
         </div>
     )
 }
@@ -171,86 +178,82 @@ const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
         <div className="mt-2">
             <div className="flex flex-row">
                 <div className="form-control">
-                    <label className="mb-1 mt-4">Add hobbies</label>
-                    <div className="flex flex-wrap gap-2 w-[500px] mb-2">
-                        {data.hobbies.map(el => {
+                    <Text>Add hobbies</Text>
+                    <Flex gap={5} direction="row" wrap="wrap">
+                    {data.hobbies.map(el => {
                             return (
-                                <div
-                                    className="badge badge-primary gap-2"
-                                    onClick={() => removeHobby(el)}
+                                <Badge 
+                                    onClick={() => removeHobby(el)} 
+                                    rightSection={<FaTrash/>}
+                                    size="lg"
+                                    sx={{ cursor: "pointer" }}
                                 >
-                                    <ImCross
-                                        className="text-neutral hover:opacity-60 hover:cursor-pointer"
-                                        size={10}
-                                    />
-
                                     {el}
-                                </div>
+                                </Badge>
                             )
                         })}
-                    </div>
+                    </Flex>
 
-                    <div className="input-group">
-                        <input
+                    <Flex direction="row" wrap="wrap" mt={5} gap={10}>
+                        <Input
                             type="text"
                             placeholder="New hobby name..."
-                            className="input input-bordered"
                             value={newHobby}
                             onChange={(e) => setNewHobby(e.target.value)}
                         />
 
-                        <button
-                            className="btn btn-square bg-primary hover:bg-primary"
+                        <Button
                             onClick={pushHobbies}
+                            rightIcon={<AiOutlinePlus size={20} color="white" />}
                         >
-                            <AiOutlinePlus size={20} color="white" />
-                        </button>
-                    </div>
+                            Add
+                        </Button>
+                    </Flex>
 
-                    <label className="mb-1 mt-4">Add socials</label>
-                    <div>
-                        <div className='flex flex-wrap max-w-[400px]'>
+                    <Text mt={15}>Add socials</Text>
+                    <Box>
+                        <Flex direction="row" wrap="wrap">
                             {data.socials.map(el => {
-                                return (<SocialBadge social={el} />)
+                                return (<Badge size='lg'>{el.text}</Badge>)
                             })}
-                        </div>
+                        </Flex>
 
-                        <select
+                        <Select
+                            mt={5}
                             value={newSocialData.type}
-                            onChange={(e) => {
-                                changeSocialData("type", e.target.value as SocialType);
+                            onChange={(value) => {
+                                changeSocialData("type", value as SocialType);
                             }}
-                            className="select select-bordered w-full max-w-xs mt-2"
-                        >
-                            <option value={SocialType.DISCORD}>Discord</option>
-                            <option value={SocialType.EMAIL}>Email</option>
-                            <option value={SocialType.GITHUB}>Github</option>
-                            <option value={SocialType.URL}>Url</option>
-                        </select>
+                            label="Your favorite framework/library"
+                            placeholder="Pick one"
+                            data={[
+                                { value: SocialType.DISCORD, label: 'Discord' },
+                                { value: SocialType.EMAIL, label: 'Email' },
+                                { value: SocialType.GITHUB, label: 'Github' },
+                                { value: SocialType.URL, label: 'Url' },
+                            ]}
+                        />
 
-                        <input
+                        <Input
+                            mt={5}
                             type="text"
                             placeholder="Text"
-                            className="input input-bordered block mt-3"
                             value={newSocialData.text || ""}
                             onChange={(e) => changeSocialData("text", e.target.value)}
                         />
 
-                        <input
+                        <Input
+                            mt={5}
                             type="text"
                             placeholder="Url / content"
-                            className="input input-bordered mt-3 mb-3"
                             value={newSocialData.url}
                             onChange={(e) => changeSocialData("url", e.target.value)}
                         />
 
-                        <button
-                            className='ml-3 btn btn-primary'
-                            onClick={addSocial}
-                        >
+                        <Button mt={10} onClick={addSocial}>
                             Add
-                        </button>
-                    </div>
+                        </Button>
+                    </Box>
                 </div>
             </div>
         </div>
@@ -271,69 +274,55 @@ const StepThree = ({ onResult }: { onResult: (data: StepThreeResult) => void }) 
     registerPlugin(FilePondPluginImagePreview);
 
     return (
-        <div className="mt-2">
-            <label className="mb-1 mt-6">Upload profile picture</label>
+        <Box>
+            <Text>Upload profile picture</Text>
+            <FilePond
+                allowMultiple={false}
+                maxFiles={1}
+                name="files"
+                onaddfile={async (error, file) => {
+                    if (error) return;
 
-            <div className="mt-3">
-                <FilePond
-                    allowMultiple={false}
-                    maxFiles={1}
-                    name="files"
-                    onaddfile={async (error, file) => {
-                        if (error) return;
+                    if (await uploadFile(
+                        `pfps/${data?.user.id}`,
+                        new File([file.file], file.file.name, {
+                            type: file.file.type,
+                        }),
+                        "test"
+                    )) {
+                        setResult({
+                            ...result,
+                            image: `${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/pfps/${data?.user.id}`
+                        });
+                    };
+                }}
+                labelIdle='Drag & Drop your profile picture <span class="filepond--label-action">or click here</span>'
+            />
 
-                        if (await uploadFile(
-                            `pfps/${data?.user.id}`,
-                            new File([file.file], file.file.name, {
-                                type: file.file.type,
-                            }),
-                            "test"
-                        )) {
-                            setResult({
-                                ...result,
-                                image: `${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/pfps/${data?.user.id}`
-                            });
-                        };
-                    }}
-                    labelIdle='Drag & Drop your profile picture <span class="filepond--label-action">or click here</span>'
-                />
-            </div>
+            <Text className="mb-1 mt-4">Upload banner</Text>
+            <FilePond
+                allowMultiple={false}
+                maxFiles={1}
+                name="files"
+                onaddfile={async (error, file) => {
+                    if (error) return;
 
-            <label className="mb-1 mt-4">Upload banner</label>
-            <div className="mt-3">
-                <FilePond
-                    allowMultiple={false}
-                    maxFiles={1}
-                    name="files"
-                    onaddfile={async (error, file) => {
-                        if (error) return;
-
-                        if (await uploadFile(
-                            `banner/${data?.user.id}`,
-                            new File([file.file], file.file.name, {
-                                type: file.file.type,
-                            }),
-                            "test"
-                        )) {
-                            setResult({
-                                ...result,
-                                banner: `${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/banner/${data?.user.id}`
-                            });
-                        };
-                    }}
-                    labelIdle='Drag & Drop your profile picture <span class="filepond--label-action">or click here</span>'
-                />
-            </div>
-        </div>
-    )
-}
-
-const StepFour = () => {
-    return (
-        <div className="mt-2">
-            <Title>Well done!</Title>
-            <p className="table w-[400px] mb-4">You're now ready to explore the MEETU network!</p>
-        </div>
+                    if (await uploadFile(
+                        `banner/${data?.user.id}`,
+                        new File([file.file], file.file.name, {
+                            type: file.file.type,
+                        }),
+                        "test"
+                    )) {
+                        setResult({
+                            ...result,
+                            banner: `${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/banner/${data?.user.id}`
+                        });
+                    };
+                }}
+                labelIdle='Drag & Drop your banner <span class="filepond--label-action">or click here</span>'
+            />
+        </Box>
     )
 }
 
@@ -345,11 +334,10 @@ const SetupPage = () => {
     const [stepThreeResult, setStepThreeResult] = useState<StepThreeResult>();
 
     const updateUser = api.user.updateUser.useMutation();
-    const [page, setPage] = useState<number>(1);
     const router = useRouter();
 
     const incrementPage = () => {
-        switch (page) {
+        switch (active) {
             case 1:
                 updateUser.mutateAsync(stepOneResult as any);
                 break;
@@ -362,76 +350,61 @@ const SetupPage = () => {
             case 4:
                 updateUser.mutateAsync({
                     setupDone: true
-                })
+                });
+
+                router.push('/app');
                 break;
         }
 
-        setPage(page + 1);
-
-        if (page > 3) {
-            router.push("/app");
-        }
+        setActive(active + 1);
     }
 
-    const renderPage = () => {
-        switch (page) {
-            case 1: return <StepOne onResult={(data) => {
-                setStepOneResult(data);
-            }} />
-            case 2: return <StepTwo onResult={(data) => {
-                setStepTwoResult(data);
-            }} />
-            case 3: return <StepThree onResult={(data) => {
-                setStepThreeResult(data);
-            }} />
-            case 4: return <StepFour />
-        }
-    }
-
-    const handleStepChange = (nextStep: number) => {
-        const isOutOfBounds = nextStep > 3 || nextStep < 0;
-
-        if (isOutOfBounds) {
-            return;
-        }
-
-        setActive(nextStep);
-        setHighestStepVisited((hSC) => Math.max(hSC, nextStep));
-    };
-
-    // Allow the user to freely go back and forth between visited steps.
     const shouldAllowSelectStep = (step: number) => highestStepVisited >= step && active !== step;
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
-            <div className="card-normal bg-neutral rounded-xl p-8">
-                <Stepper active={active} onStepClick={setActive} breakpoint="sm">
-                    <Stepper.Step
-                        label="Basic information"
-                        description="Provide some basics about you"
-                        allowStepSelect={shouldAllowSelectStep(0)}
-                    />
-                    <Stepper.Step
-                        label="Second step"
-                        description="Verify email"
-                        allowStepSelect={shouldAllowSelectStep(1)}
-                    />
-                    <Stepper.Step
-                        label="Final step"
-                        description="Get full access"
-                        allowStepSelect={shouldAllowSelectStep(2)}
-                    />
-                </Stepper>
+        <Paper withBorder mx={"auto"} w={900} p={20} radius={10}>
+            <Stepper active={active} onStepClick={setActive} breakpoint="sm">
+                <Stepper.Step
+                    label="Basic information"
+                    description="Provide some basics about you"
+                    allowStepSelect={shouldAllowSelectStep(0)}
+                >
+                    <StepOne onResult={(data) => {
+                        setStepOneResult(data);
+                    }} />
+                </Stepper.Step>
 
-                <div className="mt-2">
-                    {renderPage()}
+                <Stepper.Step
+                    label="Second step"
+                    description="Verify email"
+                    allowStepSelect={shouldAllowSelectStep(1)}
+                >
+                    <StepTwo onResult={(data) => {
+                        setStepTwoResult(data);
+                    }} />
+                </Stepper.Step>
 
-                    <Button onClick={incrementPage}>
-                        Continue
-                    </Button>
-                </div>
-            </div>
-        </div>
+                <Stepper.Step
+                    label="Final step"
+                    description="Get full access"
+                    allowStepSelect={shouldAllowSelectStep(2)}
+                >
+                    <StepThree onResult={(data) => {
+                        setStepThreeResult(data);
+                    }} />
+                </Stepper.Step>
+
+                <Stepper.Step
+                    label="Done"
+                    description="Click continue to explore Meetu network"
+                    allowStepSelect={shouldAllowSelectStep(3)}
+                />
+            </Stepper>
+
+            <Button mt={15} onClick={incrementPage}>
+                Continue
+            </Button>
+        </Paper>
     )
 }
 

@@ -1,5 +1,6 @@
 import { User } from "@prisma/client";
-import { createStyles, Card, Avatar, Text, Group, Button, rem } from '@mantine/core';
+import { createStyles, Card, Avatar, Text, Group, Button, rem, Box } from '@mantine/core';
+import { Image } from "@mantine/core";
 
 const useStyles = createStyles((theme) => ({
     card: {
@@ -20,7 +21,13 @@ export function UserCardImage({ user }: UserCardImageProps) {
 
     return (
         <Card withBorder padding="md" radius="md" className={classes.card}>
-            {user.banner ? <Card.Section sx={{ backgroundImage: `url(${user.banner})`, backgroundRepeat: 'no-repeat', height: 140 }} /> : <Card.Section sx={{ backgroundImage: `url(${user.image})`, height: 140 }} />}
+            <Image
+                src={user.banner ? user.banner : user.image}
+                height={"100px"}
+                width={"100%"}
+                sx={{ borderRadius: "10px", overflow: "hidden" }}
+            />
+
             <Avatar src={user.image} size={80} radius={80} mx="auto" mt={-30} className={classes.avatar} />
             <Text ta="center" fz="lg" fw={500} mt="sm">
                 {user.name}
