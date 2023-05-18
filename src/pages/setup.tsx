@@ -44,19 +44,17 @@ interface StepThreeResult {
 }
 
 const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
-    const initialState = {
+    const [data, setData] = useState<StepOneResult>({
         age: 0,
         bio: "",
         gender: Gender.MALE
-    };
-    const [data, setData] = useState<StepOneResult>(initialState);
+    });
 
     useEffect(() => {
-        if(data === initialState)
-            onResult({
-                ...data,
-                gender: data.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE
-            });
+        onResult({
+            ...data,
+            gender: data.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE
+        });
     }, [data]);
 
     return (
@@ -112,16 +110,15 @@ const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
 
 const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
     const [newHobby, setNewHobby] = useState<string>("");
-    const initialState = {
-        hobbies: [],
-        socials: []
-    };
     const [newSocialData, setNewSocialData] = useState<Omit<Social, "id" | "userId">>({
         url: "",
         text: "",
         type: SocialType.URL
     });
-    const [data, setData] = useState<StepTwoResult>(initialState);
+    const [data, setData] = useState<StepTwoResult>({
+        hobbies: [],
+        socials: []
+    });
 
     useEffect(() => {
         onResult(data);
@@ -262,16 +259,13 @@ const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
 }
 
 const StepThree = ({ onResult }: { onResult: (data: StepThreeResult) => void }) => {
-    const initialState = {
+    const [result, setResult] = useState<StepThreeResult>({
         image: "",
         banner: ""
-    };
-    const [result, setResult] = useState<StepThreeResult>(initialState);
+    });
     const { data } = useSession();
 
-    useEffect(() => {
-        if(result === initialState) onResult(result);
-    }, [result]);
+    useEffect(() => onResult(result), [result]);
 
     registerPlugin(FilePondPluginImagePreview);
 
