@@ -1,18 +1,17 @@
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import { FilePond, registerPlugin } from "react-filepond";
 import { Gender, Social, SocialType } from "@prisma/client";
-import SocialBadge from '@/components/SocialBadge';
 import { GetServerSidePropsContext } from "next";
 import { AiOutlinePlus } from "react-icons/ai";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
-import { ImCross } from "react-icons/im";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { api } from '@/utils/api';
-import { prisma } from '@/server/db';
 import { uploadFile } from '@/utils/supabase';
 import { useSession } from 'next-auth/react';
+import { FaTrash } from 'react-icons/fa';
+import { prisma } from '@/server/db';
+import { api } from '@/utils/api';
 import { env } from '@/env.mjs';
 import {
     Badge,
@@ -27,7 +26,6 @@ import {
     Text,
     Textarea
 } from '@mantine/core';
-import { FaTrash } from 'react-icons/fa';
 
 interface StepOneResult {
     age: number;
@@ -46,17 +44,19 @@ interface StepThreeResult {
 }
 
 const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
-    const [data, setData] = useState<StepOneResult>({
+    const initialState = {
         age: 0,
         bio: "",
         gender: Gender.MALE
-    });
+    };
+    const [data, setData] = useState<StepOneResult>(initialState);
 
     useEffect(() => {
-        onResult({
-            ...data,
-            gender: data.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE
-        });
+        if(data === initialState)
+            onResult({
+                ...data,
+                gender: data.gender === Gender.MALE ? Gender.FEMALE : Gender.MALE
+            });
     }, [data]);
 
     return (
@@ -112,15 +112,16 @@ const StepOne = ({ onResult }: { onResult: (data: StepOneResult) => void }) => {
 
 const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
     const [newHobby, setNewHobby] = useState<string>("");
+    const initialState = {
+        hobbies: [],
+        socials: []
+    };
     const [newSocialData, setNewSocialData] = useState<Omit<Social, "id" | "userId">>({
         url: "",
         text: "",
         type: SocialType.URL
     });
-    const [data, setData] = useState<StepTwoResult>({
-        hobbies: [],
-        socials: []
-    });
+    const [data, setData] = useState<StepTwoResult>(initialState);
 
     useEffect(() => {
         onResult(data);
@@ -261,14 +262,15 @@ const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
 }
 
 const StepThree = ({ onResult }: { onResult: (data: StepThreeResult) => void }) => {
-    const [result, setResult] = useState<StepThreeResult>({
+    const initialState = {
         image: "",
         banner: ""
-    });
+    };
+    const [result, setResult] = useState<StepThreeResult>(initialState);
     const { data } = useSession();
 
     useEffect(() => {
-        onResult(result);
+        if(result === initialState) onResult(result);
     }, [result]);
 
     registerPlugin(FilePondPluginImagePreview);
@@ -338,16 +340,16 @@ const SetupPage = () => {
 
     const incrementPage = () => {
         switch (active) {
-            case 1:
+            case 0:
                 updateUser.mutateAsync(stepOneResult as any);
                 break;
-            case 2:
+            case 1:
                 updateUser.mutateAsync(stepTwoResult as any)
                 break;
-            case 3:
+            case 2:
                 updateUser.mutateAsync(stepThreeResult as any);
                 break;
-            case 4:
+            case 3:
                 updateUser.mutateAsync({
                     setupDone: true
                 });
