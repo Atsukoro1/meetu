@@ -1,261 +1,209 @@
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import { authOptions } from "@/server/auth";
-import { prisma } from "@/server/db";
-import { api } from "@/utils/api";
-import { getServerSession } from "next-auth";
-import { useMemo, useState } from "react";
-import SocialBadge from "@/components/SocialBadge";
-import { ProfileCard } from "@/components/ProfileCard";
-import Skeleton from "@/components/Skeleton";
-import { Social } from "@prisma/client";
-import Post, { ExtendedPost } from "@/components/Post";
-import { useSession } from "next-auth/react";
+import { IconHeart } from '@tabler/icons-react';
+import {
+  Card,
+  Image,
+  Text,
+  Group,
+  Badge,
+  Button,
+  ActionIcon,
+  createStyles,
+  rem,
+} from '@mantine/core';
+import { getServerSession } from 'next-auth';
+import { GetServerSidePropsContext } from 'next';
+import { authOptions } from '@/server/auth';
+import { prisma } from '@/server/db';
+import { Social, User } from '@prisma/client';
+import Link from 'next/link';
+import { useState } from 'react';
+import { api } from '@/utils/api';
+import { useSession } from 'next-auth/react';
 
-const AboutTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
-    return (
-        <div>
-            <label>Hobbies</label>
-            <div className="mt-1.5 mb-3 flex flex-wrap max-w-[400px] gap-2">
-                {user.hobbies && user.hobbies.map((el: String) => {
-                    return (
-                        <div
-                            key={Math.random().toString()}
-                            className="badge badge-primary gap-2"
-                        >
-                            {el}
-                        </div>
-                    )
-                })}
-            </div>
+const useStyles = createStyles((theme) => ({
+  card: {
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+    width: "400px",
+    margin: "auto"
+  },
 
-            <label>Socials</label>
-            <div className="mt-1.5 mb-3 flex flex-wrap max-w-[400px] gap-2">
-                {user.socials && user.socials.map((el: Social) => {
-                    return (
-                        <SocialBadge key={el.id} social={el} />
-                    )
-                })}
-            </div>
-        </div>
-    )
-};
+  section: {
+    borderBottom: `${rem(1)} solid ${theme.colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3]
+      }`,
+    paddingLeft: theme.spacing.md,
+    paddingRight: theme.spacing.md,
+    paddingBottom: theme.spacing.md,
+  },
 
-const PostsTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
-    const posts = api.post.getPostsByUser.useQuery({
-        userId: user.id,
-        page: 1,
-        perPage: 10
-    });
+  like: {
+    color: theme.colors.red[6],
+  },
 
-    return (
-        <div>
-            {posts.isLoading ? (
-                <div className="flex flex-col gap-2">
-                    <Skeleton height={"100px"} width={"100%"} />
-                    <Skeleton height={"100px"} width={"100%"} />
-                    <Skeleton height={"100px"} width={"100%"} />
-                    <Skeleton height={"100px"} width={"100%"} />
-                </div>
-            ) : (
-                <div className="flex flex-col gap-2">
-                    {posts.data?.map((el: ExtendedPost) => {
-                        return (
-                            <Post post={el} />
-                        )
-                    })}
-                </div>
-            )}
-        </div>
-    )
-};
+  label: {
+    textTransform: 'uppercase',
+    fontSize: theme.fontSizes.xs,
+    fontWeight: 700,
+  },
+}));
 
-const FollowingTab = ({ user }: Omit<InferGetServerSidePropsType<typeof getServerSideProps>, 'isFollowing'>) => {
-    const followings = api.user.getFollowing.useQuery({
-        userId: user.id
-    });
 
-    return (
-        <div className="gap-3 flex flex-col">
-            {followings.isLoading ? (
-                <Skeleton
-                    width={"100%"}
-                    height="100px"
-                />
-            ) : (
-                followings.data?.following.map((el: any) => {
-                    return (
-                        <ProfileCard user={el.following} />
-                    )
-                })
-            )}
-        </div>
-    )
-};
+export function ProfilePage({ user, isFollowing, isConversation }: { user: User & { socials: Social[] }, isFollowing: boolean, isConversation: boolean }) {
+  const session = useSession();
+  const { classes } = useStyles();
 
-const Profile = ({ user, isFollowing }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-    const [following, setFollowing] = useState<boolean>(isFollowing);
-    const fetchConversation = api.conversation.fetch.useQuery();
-    const [activeTab, setActiveTab] = useState<number>(1);
-    const session = useSession();
+  const [follow, setFollow] = useState(isFollowing);
+  const [conversation, setConversation] = useState(isConversation);
 
-    const createConversation = api.conversation.createConversation.useMutation({
-        onSuccess(_data, _variables, _context) {
-            fetchConversation.refetch();
-        },
-    });
-    const followUser = api.user.folllowUser.useMutation({
-        onSuccess(_data, _variables, _context) {
-            setFollowing(true);
-        }
-    });
-    const unfollowUser = api.user.unfollowUser.useMutation({
-        onSuccess(_data, _variables, _context) {
-            setFollowing(false);
-        }
-    })
+  const followUser = api.user.folllowUser.useMutation();
+  const unfollowUser = api.user.unfollowUser.useMutation();
+  const createConversation = api.conversation.createConversation.useMutation();
 
-    const Tab = useMemo(() => {
-        switch (activeTab) {
-            case 1: return <AboutTab user={user} />;
-            case 2: return <PostsTab user={user} />
-            case 3: return <FollowingTab user={user} />
-        }
-    }, [activeTab]);
+  return (
+    <Card withBorder radius="md" p="md" className={classes.card}>
+      <Card.Section>
+        <Image src={user.image} height={180} />
+      </Card.Section>
 
-    return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
-            <div className="mt-5 card-normal bg-neutral h-fit overflow-hidden">
-                <div>
-                    <img
-                        src={user.banner as string}
-                        className="rounded-xl h-[195px] w-[550px] object-cover opacity-20"
-                    />
+      <Card.Section className={classes.section} mt="md">
+        <Group position="apart">
+          <Text fz="lg" fw={500}>
+            {user.name}
+          </Text>
+          <Badge size="sm">FEMALE {user.age}</Badge>
+        </Group>
 
-                    {session.data?.user.id !== user.id && (
-                        <button
-                            className={`btn relative top-[-60px] ${following ? "left-[420px]" : "left-[450px]"}`}
-                            onClick={() => {
-                                if (following) {
-                                    unfollowUser.mutateAsync(user.id);
-                                } else {
-                                    followUser.mutateAsync(user.id);
-                                }
-                            }}
-                        >
-                            {following ? "Following" : "Follow"}
-                        </button>
-                    )}
+        <Text
+          dangerouslySetInnerHTML={{ __html: user.bio || "" }}
+          fz="sm"
+          mt="xs"
+        />
+      </Card.Section>
 
-                    {(!fetchConversation.data?.some(el => el.userIds.includes(user.id)) && session.data?.user.id !== user.id) && (
-                        <button
-                            className={`btn relative top-[-60px] ${following ? "left-[175px]" : "left-[225px]"}`}
-                            onClick={() => {
-                                createConversation.mutateAsync({
-                                    userIds: [session.data?.user.id ?? "", user.id],
-                                    title: "Conversation with " + user.name
-                                });
-                            }}
-                        >
-                            Kontaktovat
-                        </button>
-                    )}
-                </div>
+      <Card.Section className={classes.section}>
+        <Text mt="md" className={classes.label} c="dimmed">
+          Hobbies
+        </Text>
 
-                <div className={`p-5 ${session.data?.user.id !== user.id && "mt-[-50px]"}`}>
-                    <div className="flex flex-row">
-                        <div className="avatar online mt-[-70px]">
-                            <div className="w-24 rounded-xl">
-                                <img src={user.image as string} />
-                            </div>
-                        </div>
+        <Group spacing={7} mt={5}>
+          {user.hobbies.map(el => {
+            return <Badge key={el}>{el}</Badge>
+          })}
+        </Group>
+      </Card.Section>
 
-                        <div className="flex flex-row">
-                            <h2 className="text-2xl font-bold mt-[-15px] ml-4">{user.name}</h2>
-                            <div className="badge badge-outline badge-primary mt-[-5px] ml-2">{user.age}y.o {user.gender}</div>
-                        </div>
-                    </div>
+      <Card.Section className={classes.section}>
+        <Text mt="md" className={classes.label} c="dimmed">
+          Socials
+        </Text>
 
-                    <div className="mt-4">
-                        <label className="text-lg font-semibold">Bio</label>
-                        <div className="table w-fit max-w-[500px] bg-base-100 p-2 rounded-lg">{user.bio}</div>
-                    </div>
+        <Group spacing={7} mt={5}>
+          {user.socials.map(el => {
+            return <Link href={el.url}><Badge>{el.text}</Badge></Link>
+          })}
+        </Group>
+      </Card.Section>
 
-                    <div className="tabs tabs-boxed mt-5">
-                        <a
-                            onClick={() => setActiveTab(1)}
-                            className={`tab w-1/3 ${activeTab === 1 && 'tab-active'}`}
-                        >
-                            About info
-                        </a>
-                        <a
-                            onClick={() => setActiveTab(2)}
-                            className={`tab w-1/3 ${activeTab === 2 && 'tab-active'}`}
-                        >
-                            Posts
-                        </a>
-                        <a
-                            onClick={() => setActiveTab(3)}
-                            className={`tab w-1/3 ${activeTab === 3 && 'tab-active'}`}
-                        >
-                            Following
-                        </a>
-                    </div>
+      {(session.data?.user.id !== user.id) && (
+        <Group mt="xs">
+          <Button
+            variant={follow ? "outline" : "filled"}
+            radius="md"
+            loading={followUser.isLoading || unfollowUser.isLoading}
+            onClick={async () => {
+              if (isFollowing) {
+                await unfollowUser.mutateAsync(user.id);
+                setFollow(false);
+              } else {
+                await followUser.mutateAsync(user.id);
+                setFollow(true);
+              }
+            }}
+            style={{ flex: 1 }}
+          >
+            {follow ? "Unfollow" : "Follow"}
+          </Button>
 
-                    <div className="mt-2">{Tab}</div>
-                </div>
-            </div>
-        </div>
-    )
+          {!conversation && (
+            <Button
+              variant="filled"
+              radius="md"
+              loading={createConversation.isLoading}
+              onClick={async () => {
+                await createConversation.mutateAsync({
+                  userIds: [user.id, session.data?.user.id || ""],
+                  title: "New conversation"
+                });
+
+                setConversation(true);
+              }}
+              style={{ flex: 1 }}
+            >
+              Start conversation
+            </Button>
+          )}
+        </Group>
+      )}
+    </Card>
+  );
 }
-
-export default Profile;
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-    const session = await getServerSession(context.req, context.res, authOptions);
+  const session = await getServerSession(context.req, context.res, authOptions);
 
-    if (!session) return {
-        redirect: {
-            destination: "/"
-        }
-    };
-
-    if (!context.query.slug || typeof context.query.slug !== 'string') return {
-        redirect: {
-            destination: "/404"
-        }
+  if (!session) return {
+    redirect: {
+      destination: "/"
     }
+  };
 
-    const user = await prisma.user.findFirst({
-        where: {
-            slug: context.query.slug
-        },
-        include: {
-            socials: true,
-            following: true
-        }
-    });
-
-    if (!user) {
-        return {
-            redirect: {
-                destination: "/"
-            }
-        };
+  if (!context.query.slug || typeof context.query.slug !== 'string') return {
+    redirect: {
+      destination: "/404"
     }
+  }
 
-    const existingRelation = await prisma.userFollows.findUnique({
-        where: {
-            followerId_followingId: {
-                followerId: user.id,
-                followingId: session.user.id,
-            },
-        },
-    });
+  const user = await prisma.user.findFirst({
+    where: {
+      slug: context.query.slug
+    },
+    include: {
+      socials: true,
+      following: true
+    }
+  });
 
+  if (!user) {
     return {
-        props: {
-            user: JSON.parse(JSON.stringify(user)),
-            isFollowing: !!existingRelation
-        }
+      redirect: {
+        destination: "/"
+      }
+    };
+  }
+
+  const existingRelation = await prisma.userFollows.findUnique({
+    where: {
+      followerId_followingId: {
+        followerId: user.id,
+        followingId: session.user.id,
+      },
+    },
+  });
+
+  const existingConversation = await prisma.conversation.findFirst({
+    where: {
+      userIds: {
+        hasEvery: [user.id, session.user.id]
+      }
     }
+  });
+
+  return {
+    props: {
+      user: JSON.parse(JSON.stringify(user)),
+      isFollowing: !!existingRelation,
+      isConversation: !!existingConversation
+    }
+  }
 }
+
+export default ProfilePage;

@@ -136,7 +136,8 @@ const conversationRouter = createTRPCRouter({
 
             const hasMore = skip + (input.perPage as number) < totalCount;
 
-            return { messages: updatedMessages, hasMore };
+            // Added hasNextPage field
+            return { messages: updatedMessages, hasMore, hasNextPage: hasMore };
         })
 });
 

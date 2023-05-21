@@ -1,64 +1,109 @@
-import { User } from "@prisma/client";
-import Link from "next/link";
+import {
+    UnstyledButton,
+    UnstyledButtonProps,
+    Group,
+    Avatar,
+    Text,
+    createStyles,
+    Flex,
+} from '@mantine/core';
+import { User } from '@prisma/client';
+import Link from 'next/link';
 
-type ProfileSearchResultPropsI = {
-    onClick: () => void;
-    user: User;
+const useProfileCardStyles = createStyles((theme) => ({
+    user: {
+        width: '100%',
+        padding: theme.spacing.md,
+        color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
+
+        '&:hover': {
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+        },
+    },
+}));
+
+const useProfileHighlightStyles = createStyles((theme) => ({
+    user: {
+        '&:hover': {
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+        },
+    },
+
+    nameContainer: {
+        marginLeft: 15
+    }
+}));
+
+interface UserButtonProps extends UnstyledButtonProps {
+    user: User
 }
 
-type ProfileCardPropsI = {
-    user: User;
-};
+export function ProfileCard({ user, ...others }: UserButtonProps) {
+    const { classes } = useProfileCardStyles();
 
-export const ProfileSearchResult = ({ user, onClick }: ProfileSearchResultPropsI) => {
     return (
-        <div
-            onClick={onClick}
-            style={{
-                backgroundImage: `url(${user.banner}`,
-                backgroundAttachment: "fixed"
-            }}
-            className={`bg-cover w-[50%] bg-opacity-30 flex flex-row bg-base-100 rounded-xl hover:bg-neutral transition-all ease-in-out hover:cursor-pointer`}
-        >
-            <div className="flex flex-row bg-gradient-to-r from-40% from-neutral/[.90] via-neutral/[.70] to-transparent w-full bg-opacity-50 p-1">
-                <div className="mr-4">
-                    <div className="avatar">
-                        <div className="w-7 rounded-xl">
-                            <img src={user.image as string} />
-                        </div>
+        <Link href={`/profile/${user.slug}`}>
+            <UnstyledButton className={classes.user} {...others}>
+                <Group>
+                    <Avatar src={user.image} radius="xl" />
+
+                    <div style={{ flex: 1 }}>
+                        <Text size="sm" weight={500}>
+                            {user.name}
+                        </Text>
+
+                        <Text color="dimmed" size="xs">
+                            {user.email}
+                        </Text>
                     </div>
-                </div>
-
-                <h3 className="font-semibold">{user.name}</h3>
-            </div>
-        </div>
-    )
-};
-
-export const ProfileCard = ({ user }: ProfileCardPropsI) => {
-    return (
-        <Link
-            style={{
-                backgroundImage: `url(${user.banner}`,
-                backgroundAttachment: "fixed"
-            }}
-            href={`/profile/${user.slug}`}
-            className={`bg-cover overflow-hidden bg-opacity-30 flex flex-row bg-base-100 rounded-xl hover:bg-neutral transition-all ease-in-out hover:cursor-pointer`}
-        >
-            <div className="flex flex-row bg-gradient-to-r from-40% from-neutral/[.90] via-neutral/[.70] to-transparent w-full bg-opacity-50 p-3">
-                <div className="mr-4">
-                    <div className="avatar">
-                        <div className="w-14 rounded-xl">
-                            <img src={user.image as string} />
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h3 className="font-semibold">{user.name}</h3>
-                    <label className="text-sm">{user.bio?.substring(0, 70)}...</label>
-                </div>
-            </div>
+                </Group>
+            </UnstyledButton>
         </Link>
-    )
+    );
+}
+
+export function ProfileHighlightCard({ user, ...others }: UserButtonProps) {
+    const { classes } = useProfileHighlightStyles();
+
+    return (
+        <Link href={`/profile/${user.slug}`}>
+            <UnstyledButton className={classes.user} {...others}>
+                <Group>
+                    <Flex>
+                        <Avatar src={user.image} radius="xl" />
+
+                        <div className={classes.nameContainer}>
+                            <Text size="sm" weight={500}>
+                                {user.name}
+                            </Text>
+
+                            <Text color="dimmed" size="xs">
+                                @{user.slug}
+                            </Text>
+                        </div>
+                    </Flex>
+                </Group>
+
+                <Group mt="md" position="center" spacing={30}>
+                    <div>
+                        <Text ta="center" fz="lg" fw={500}>
+                            50
+                        </Text>
+                        <Text ta="center" fz="sm" c="dimmed">
+                            Followers
+                        </Text>
+                    </div>
+
+                    <div>
+                        <Text ta="center" fz="lg" fw={500}>
+                            20
+                        </Text>
+                        <Text ta="center" fz="sm" c="dimmed">
+                            Following
+                        </Text>
+                    </div>
+                </Group>
+            </UnstyledButton>
+        </Link>
+    );
 }

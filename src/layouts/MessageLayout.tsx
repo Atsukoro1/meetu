@@ -1,14 +1,41 @@
-import { AiOutlineSend } from 'react-icons/ai';
 import { useEffect, useState } from "react";
-import InfiniteScroll from "react-infinite-scroller";
-import Skeleton from "@/components/Skeleton";
-import { MessageRenderer } from "@/components/Message";
+import { Message } from "@/components/Message";
 import { NotificationType, User, Message as MessageType } from "@prisma/client";
 import { api } from "@/utils/api";
 import { useAtom } from 'jotai';
 import { NotificationPoolAtom } from '@/atoms/NotificationPoolAtom';
+import { Avatar, Button, Grid, Group, Text, Input, UnstyledButton, createStyles, Title, Flex, ScrollArea, Badge } from '@mantine/core';
+import { IconChevronRight } from '@tabler/icons-react';
+import { useSession } from 'next-auth/react';
+import { FaPaperPlane } from 'react-icons/fa';
+
+const useStyles = createStyles((theme) => ({
+    user: {
+        display: 'block',
+        width: '100%',
+        padding: theme.spacing.md,
+        color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
+
+        '&:hover': {
+            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
+        },
+        marginBottom: 15
+    },
+
+    contentGrid: {
+        padding: 20
+    },
+
+    messageContainer: {
+        flex: 1,
+        flexDirection: "column",
+        background: "rgba(186, 186, 186, .1)"
+    }
+}));
 
 const MessageLayout = () => {
+    const { data } = useSession();
+    const { classes } = useStyles();
     const [page, setPage] = useState<number>(1);
     const [notifications, setNotifications] = useAtom(NotificationPoolAtom);
 
@@ -28,7 +55,7 @@ const MessageLayout = () => {
         }
     });
 
-    const messages = api.conversation.fetchMesssages.useQuery({
+    const fetched = api.conversation.fetchMesssages.useQuery({
         page: page,
         perPage: 10,
         conversationId: selected
@@ -55,10 +82,13 @@ const MessageLayout = () => {
         notifications.forEach(notification => {
             if (notification.type === NotificationType.MESSAGE) {
                 const message = notification.data as MessageType;
+
                 if (message.conversationId === selected) {
                     const copied = [...cached];
+
                     let index = copied.findIndex(msg => msg.createdAt > message.createdAt);
                     if (index === -1) index = copied.length;
+
                     // @ts-ignore
                     copied.splice(index, 0, { ...message, author: message.author });
                     setCached(copied);
@@ -70,6 +100,8 @@ const MessageLayout = () => {
     }, [notifications, selected, cached, setNotifications]);
 
     const handleNewMessage = () => {
+        if(newMessage === '') return;
+
         createNewMessage.mutateAsync({
             content: newMessage,
             imageUrl: null,
@@ -80,72 +112,85 @@ const MessageLayout = () => {
     };
 
     return (
-        <div className="w-[45%] p-3 d-flex flex-column justify-content-between">
-            <h1 className='text-3xl font-bold'>Messages</h1>
+        <div className="w-[45%] pr-3 pl-3 d-flex flex-column justify-content-between">
+            <Grid>
+                <Grid.Col className={classes.contentGrid} span={4}>
+                    <Title mb={5} size="lg">Your conversations</Title>
 
-            <div className="tabs tabs-boxed flex mt-3 flex-row">
-                {conversations.data?.map(el => {
-                    return (
-                        <a
-                            className={`tab ${selected === el.id && 'tab-active'}`}
-                            onClick={() => setSelected(el.id)}
-                        >
-                            {el.title}
-                        </a>
-                    )
-                })}
-            </div>
-            <div className="flex flex-col gap-2 h-[69vh] overflow-scroll p-4">
-                <InfiniteScroll
-                    pageStart={1}
-                    loadMore={() => {
-                        setPage(page +
-                            1);
-                    }}
-                    hasMore={messages.data?.hasMore}
-                    loader={
-                        <div className="gap-4 flex flex-col">
-                            <Skeleton height="120px" width="100%" />
-                            <Skeleton height="120px" width="100%" />
-                            <Skeleton height="120px" width="100%" />
-                        </div>
-                    }
-                    useWindow={false}
-                >
-                    <div className="flex flex-col gap-3">
+                    {conversations.data?.length !== 0 ? (conversations.data?.map(el => {
+                        return (
+                            <UnstyledButton onClick={() => setSelected(el.id)} className={classes.user}>
+                                <Group>
+                                    <Avatar color="cyan" radius="md">MK</Avatar>
+
+                                    <div style={{ flex: 1 }}>
+                                        <Text size="sm" weight={500}>
+                                            {el.title}
+                                        </Text>
+
+                                        <Text color="dimmed" size="xs">
+                                            {el.id}
+                                        </Text>
+                                    </div>
+
+                                    <IconChevronRight size="0.9rem" stroke={1.5} />
+                                </Group>
+                            </UnstyledButton>
+                        )
+                    })) : (
+                        <Badge>No conversations</Badge>
+                    )}
+                </Grid.Col>
+
+                <Grid.Col className={classes.contentGrid} span={8}>
+                    <ScrollArea h={"60vh"} w={"100%"} className={classes.messageContainer}>
                         {cached.map(el => {
-                            return <MessageRenderer data={el} />
+                            return (
+                                <Message
+                                    data={el}
+                                    isAuthor={data?.user.id === el.authorId}
+                                />
+                            )
                         })}
-                    </div>
-                </InfiniteScroll>
-            </div>
 
-            {selected !== "" && (
-                <div className="mt-4 mx-auto w-fit gap-3">
-                    <div className='mx-auto w-fit'>
-                        <b>Tip</b>: You can use <kbd className="kbd kbd-sm">Enter</kbd> to send.
-                    </div>
+                        {fetched.data?.hasMore && (
+                            <Button 
+                                variant="outline"
+                                sx={{ margin: "10px" }}
+                                onClick={() => {
+                                    setPage(page + 1);
+                                }}
+                                loading={fetched.isLoading}
+                            >
+                                Load more messages
+                            </Button>
+                        )}
+                    </ScrollArea>
 
-                    <div className='mt-3 flex flex-row gap-3'>
-                        <input
-                            className="input input-bordered w-full"
-                            onKeyDown={(event) => {
-                                if(event.key == 'Enter') 
-                                    handleNewMessage();
+                    <Flex gap={10} mt={20} align="bottom" p={5}>
+                        <Input
+                            disabled={selected === ""}
+                            w={"100%"}
+                            placeholder='Your new message...'
+                            onKeyDown={(e) => {
+                                if(e.key === 'Enter') handleNewMessage();
                             }}
-                            placeholder="Your message..."
+                            onChange={(e) => {
+                                setNewMessage(e.target.value);
+                            }}
                             value={newMessage}
-                            onChange={(event) => setNewMessage(event.target.value)}
                         />
 
-                        <button onClick={handleNewMessage} className="btn btn-primary">
+                        <Button 
+                            disabled={selected === ""}
+                            rightIcon={<FaPaperPlane/>}
+                            onClick={handleNewMessage}
+                        >
                             Send
-
-                            <AiOutlineSend color="white" size={20} className="ml-3" />
-                        </button>
-                    </div>
-                </div>
-            )}
+                        </Button>
+                    </Flex>
+                </Grid.Col>
+            </Grid>
         </div>
     );
 

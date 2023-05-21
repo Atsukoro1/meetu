@@ -1,32 +1,21 @@
 import { Notification } from "@prisma/client";
-import { RxDotFilled } from 'react-icons/rx';
-import moment from "moment";
-import Image from "next/image";
+import { Avatar, Box, Flex, Paper, Text } from "@mantine/core";
 
 const Notification = ({ data }: { data: Notification }) => {
     return (
-        <div className="flex flex-row bg-neutral p-3 rounded-lg">
-            <div className="avatar">
-                <div className="w-14 h-14 rounded-full">
-                    <Image 
-                        width={50} 
-                        height={50} 
-                        alt={`pfp_${data.id}`} 
-                        src={data.image || ""} 
-                    />
-                </div>
-            </div>
+        <Paper w={300} variant="outline" withBorder p={14} className="flex flex-row bg-neutral p-3 rounded-lg">
+            <Flex gap={15}>
+                <Avatar
+                    alt={`pfp_${data.id}`} 
+                    src={data.image || ""} 
+                />
 
-            <div className="ml-4 align-middle mt-3">
-                <div className="flex flex-row m-auto">
-                    <h2>{data.title}</h2>
-                    <RxDotFilled className="text-slate-700" size={25}/>
-                    <label className="text-slate-500">{moment(data.createdAt).fromNow()}</label>
-                </div>
-
-                <label>{data.content}</label>
-            </div>
-        </div>
+                <Flex direction="row" wrap="wrap">
+                    <Text weight="bold">{data.title}</Text>
+                    <Text size="sm" color="dimmed">{data.content}</Text>
+                </Flex>
+            </Flex>
+        </Paper>
     )
 }
 
