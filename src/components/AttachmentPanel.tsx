@@ -15,12 +15,6 @@ const AttachmentPanel = ({ onAttachment }: { onAttachment: (attachment: Attachme
 
     return (
         <div className="flex flex-row gap-2">
-            <a onClick={() => setModalOpen(true)}>
-                <button className="btn btn-square rounded-xl bg-base-100 hover:neutral">
-                    <AiFillPicture size={25} />
-                </button>
-            </a>
-
             <div className={`modal ${modalOpen ? "modal-open" : ""}`}>
                 <div className="modal-box">
                     <h3 className="font-bold text-lg mb-4">Upload the image/video!</h3>
@@ -49,15 +43,6 @@ const AttachmentPanel = ({ onAttachment }: { onAttachment: (attachment: Attachme
                         }}
                         labelIdle='Drag & Drop your profile picture <span class="filepond--label-action">or click here</span>'
                     />
-
-                    <div className="modal-action mt-7">
-                        <a 
-                            href="#" 
-                            onClick={() => setModalOpen(false)}
-                        >
-                            Close
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

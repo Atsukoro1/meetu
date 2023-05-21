@@ -1,5 +1,72 @@
-import slugify from "@/utils/slugify";
 import { User } from "@prisma/client";
+import { createStyles, Card, Avatar, Text, Group, Button, rem, Box } from '@mantine/core';
+import { Image } from "@mantine/core";
+
+const useStyles = createStyles((theme) => ({
+    card: {
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+    },
+
+    avatar: {
+        border: `${rem(9)} solid ${theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white}`,
+    },
+}));
+
+interface UserCardImageProps {
+    user: ExtendedUser
+}
+
+export function UserCardImage({ user }: UserCardImageProps) {
+    const { classes } = useStyles();
+
+    return (
+        <Card withBorder padding="md" radius="md" className={classes.card}>
+            <Image
+                src={user.banner ? user.banner : user.image}
+                height={"100px"}
+                width={"100%"}
+                sx={{ borderRadius: "10px", overflow: "hidden" }}
+            />
+
+            <Avatar src={user.image} size={100} radius={80} mx="auto" mt={-30} className={classes.avatar} />
+            <Text ta="center" fz="lg" fw={500} mt="sm">
+                {user.name}
+            </Text>
+            <Text ta="center" fz="sm" c="dimmed">
+                @{user.slug}
+            </Text>
+
+            <Group mt="md" position="center" spacing={30}>
+                <div>
+                    <Text ta="center" fz="lg" fw={500}>
+                        {user.followerCount}
+                    </Text>
+                    <Text ta="center" fz="sm" c="dimmed">
+                        Followers
+                    </Text>
+                </div>
+
+                <div>
+                    <Text ta="center" fz="lg" fw={500}>
+                        {user.followingCount}
+                    </Text>
+                    <Text ta="center" fz="sm" c="dimmed">
+                        Following
+                    </Text>
+                </div>
+
+                <div>
+                    <Text ta="center" fz="lg" fw={500}>
+                        {user.postCount}
+                    </Text>
+                    <Text ta="center" fz="sm" c="dimmed">
+                        Posts
+                    </Text>
+                </div>
+            </Group>
+        </Card>
+    );
+}
 
 export type ExtendedUser = User & {
     postCount: number;
@@ -7,41 +74,4 @@ export type ExtendedUser = User & {
     followingCount: number;
 }
 
-const ProfileHighlight = ({ user }: { user: ExtendedUser }) => {
-    return (
-        <div className="w-full rounded-xl bg-neutral p-3 mt-4">
-            <img
-                src={user.image || ""}
-                className="w-[90px] mx-auto  object-cover rounded-full"
-                alt="banner"
-            />
-
-            <div className="w-fit mx-auto">
-                <h2 className="text-center text-lg font-bold mt-3">{user.name}</h2>
-                
-                <label className="text-center text-md text-slate-400">
-                    @{slugify(user.name || "")}
-                </label>
-            </div>
-
-            <div className="w-fit mx-auto flex flex-row gap-4 mt-3">
-                <div className="text-center bg-base-100 p-2 rounded-lg">
-                    <p className="text-primary">Posts</p>
-                    <p>{user.postCount}</p>
-                </div>
-
-                <div className="text-center bg-base-100 p-2 rounded-lg">
-                    <p className="text-primary">Following</p>
-                    <p>{user.followingCount}</p>
-                </div>
-
-                <div className="text-center bg-base-100 p-2 rounded-lg">
-                    <p className="text-primary">Followers</p>
-                    <p>{user.followerCount}</p>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-export default ProfileHighlight;
+export default UserCardImage;

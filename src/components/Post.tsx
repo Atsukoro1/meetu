@@ -1,13 +1,49 @@
-import { FaRegThumbsDown, FaRegThumbsUp } from 'react-icons/fa';
-import { BiCommentDetail } from 'react-icons/bi';
+import { createStyles, Text, Avatar, Group, Paper, ActionIcon, HoverCard, Flex, Modal, Image } from '@mantine/core';
 import { Attachment as AttachmentI, Post, User } from '@prisma/client';
-import { api } from '@/utils/api';
-import { useState } from 'react';
-import Link from 'next/link';
-import PostModal from './PostModal';
-import Attachment from './Attachment';
 import moment from 'moment';
+import { FaRegComment, FaRegThumbsDown, FaRegThumbsUp, FaThumbsDown, FaThumbsUp } from 'react-icons/fa';
+import { ProfileHighlightCard } from './ProfileCard';
 import PostContent from './PostContent';
+import { useState } from 'react';
+import { api } from '@/utils/api';
+import { useDisclosure } from '@mantine/hooks';
+import PostComments from './PostComments';
+import { env } from '@/env.mjs';
+
+const useStyles = createStyles((theme) => ({
+    body: {
+        marginBottom: 10,
+        paddingTop: theme.spacing.sm,
+    },
+
+    border: {
+        padding: `${theme.spacing.lg} ${theme.spacing.xl}`,
+        width: "100%"
+    },
+
+    avatar: {
+        image: {
+            height: 50,
+            width: 50
+        }
+    },
+
+    avatarContainer: {
+        "&:hover": {
+            cursor: "pointer"
+        },
+        width: '40%'
+    },
+
+    postImage: {
+        borderRadius: "10px",
+        overflow: "hidden"
+    }
+}));
+
+interface PostSimpleProps {
+    post: ExtendedPost;
+}
 
 export type ExtendedPost = Post & {
     author: User;
@@ -18,115 +54,130 @@ export type ExtendedPost = Post & {
     dislikeCount: number;
 };
 
-const PostComponent = ({ post }: { post: ExtendedPost }) => {
-    const [commentModalOpen, setCommentModalOpen] = useState<boolean>(false);
+export function PostSimple({ post }: PostSimpleProps) {
     const toggleInteraction = api.post.toggleInteraction.useMutation();
-    const [disliked, setDisliked] = useState<boolean>(post.userDisliked);
-    const [liked, setLiked] = useState<boolean>(post.userLiked);
-    const [likedCount, setLikedCount] = useState<number>(post.likeCount);
-    const [dislikedCount, setDislikedCount] = useState<number>(post.dislikeCount);
+    const [modalOpened, { open, close }] = useDisclosure();
 
+    const [reactions, setReactions] = useState({
+        liked: post.userLiked,
+        disliked: post.userDisliked
+    });
+    const [counts, setCounts] = useState({
+        likedCount: post.likeCount,
+        dislikedCount: post.dislikeCount
+    });
 
-    const changeLiked = (to: boolean) => {
-        if (disliked) {
-            setDisliked(false);
-            setDislikedCount(dislikedCount - 1);
-        }
+    const { classes } = useStyles();
 
-        if (to) {
-            setLikedCount(likedCount + 1);
+    const onInteractionClick = (type: 'DISLIKE' | 'LIKE') => {
+        const localOpposite = type === 'DISLIKE' ? 'liked' : 'disliked';
+        const localExact = type === 'DISLIKE' ? 'disliked' : 'liked';
+
+        if (reactions[localOpposite]) {
+            toggleInteraction.mutate({
+                type: type === 'DISLIKE' ? 'LIKE' : "DISLIKE",
+                postId: post.id
+            });
+        };
+
+        toggleInteraction.mutate({
+            type: type,
+            postId: post.id
+        });
+
+        if (localExact === 'disliked') {
+            setCounts({
+                ...counts,
+                ...reactions.liked && {
+                    likedCount: counts.likedCount - 1
+                },
+                dislikedCount: reactions.disliked ? counts.dislikedCount - 1 : counts.dislikedCount + 1
+            });
         } else {
-            setLikedCount(likedCount - 1);
+            setCounts({
+                ...counts,
+                ...reactions.disliked && {
+                    dislikedCount: counts.dislikedCount - 1,
+                },
+                likedCount: reactions.liked ? counts.likedCount - 1 : counts.likedCount + 1
+            });
         }
 
-        setLiked(to);
-    };
-
-    const changeDisliked = (to: boolean) => {
-        if (liked) {
-            setLiked(false);
-            setLikedCount(likedCount - 1);
-        }
-
-        if (to) {
-            setDislikedCount(dislikedCount + 1);
-        } else {
-            setDislikedCount(dislikedCount - 1);
-        }
-
-        setDisliked(to);
-    };
+        setReactions({
+            ...reactions,
+            [localExact]: !reactions[localExact],
+            ...reactions[localOpposite] && {
+                [localOpposite]: false
+            }
+        });
+    }
 
     return (
-        <div className="bg-neutral p-5 rounded-lg flex flex-row">
-            <Link href={`/profile/${post.author.slug}`} className="avatar">
-                <div className="w-14 h-14 rounded-xl">
-                    <img src={post.author.image || ''} />
-                </div>
-            </Link>
-
-            <div className="ml-5">
-                <Link href={`/profile/${post.author.slug}`} className="flex flex-row gap-1">
-                    <h2 className="font-semibold text-md">{post.author.name}</h2>
-                    <label className="ml-1.5">@{post.author.slug}</label>
-                    <label className='ml-2 opacity-30'>{moment(post.createdAt).fromNow()}</label>
-                </Link>
-
-                <PostContent content={post.content}/>
-
-                <Attachment data={post.attachment} />
-
-                <div className="flex flex-row gap-2 mt-2">
-                    <div className='flex flex-row gap-2'>
-                        <FaRegThumbsUp
-                            onClick={() => {
-                                toggleInteraction.mutateAsync({
-                                    postId: post.id, 
-                                    type: 'LIKE',
-                                });
-                                changeLiked(liked ? false : true);
-                            }}
-                            size={25}
-                            className={`hover:cursor-pointer ${liked && 'text-primary'}`}
+        <Paper withBorder radius="md" className={classes.border}>
+            <HoverCard width={200} position='bottom' withArrow shadow='md'>
+                <HoverCard.Target>
+                    <Group className={classes.avatarContainer}>
+                        <Avatar
+                            src={post.author.image}
+                            alt={post.author.name || ""}
+                            className={classes.avatar}
                         />
 
-                        {likedCount}
-                    </div>
+                        <div>
+                            <Text size="sm">{post.author.name}</Text>
+                            <Text size="xs" color="dimmed">
+                                {moment().from(post.createdAt)}
+                            </Text>
+                        </div>
+                    </Group>
+                </HoverCard.Target>
 
-                    <div className='flex flex-row gap-2'>
-                        <FaRegThumbsDown
-                            onClick={() => {
-                                toggleInteraction.mutateAsync({
-                                    postId: post.id,
-                                    type: 'DISLIKE',
-                                });
-                                changeDisliked(disliked ? false : true);
-                            }}
-                            size={25}
-                            className={`hover:cursor-pointer ${disliked && 'text-primary'}`}
+                <Text className={classes.body} size="sm">
+                    <PostContent content={post.content} />
+                </Text>
+
+                {post.attachment && (
+                    <Group spacing={5} mt={2} mb={10}>
+                        <Image
+                            className={classes.postImage}
+                            src={`${env.NEXT_PUBLIC_SUPABASE_PUBLIC_STORAGE_URL}/attachment/${post.attachmentId}`}
+                            height={140}
+                            fit='cover'
+                            width={200}
                         />
+                    </Group>
+                )}
 
-                        {dislikedCount}
-                    </div>
+                <Group spacing={8} mr={0}>
+                    <Flex>
+                        <ActionIcon variant='transparent' onClick={() => onInteractionClick('LIKE')}>
+                            {reactions.liked ? <FaThumbsUp size="1rem" /> : <FaRegThumbsUp size="1rem" />}
+                        </ActionIcon>
+                        <Text>{counts.likedCount}</Text>
+                    </Flex>
 
-                    <label onClick={() => setCommentModalOpen(true)}>
-                        <BiCommentDetail
-                            size={25}
-                            className={`hover:cursor-pointer`}
-                        />
-                    </label>
-                </div>
-            </div>
+                    <Flex>
+                        <ActionIcon variant='subtle' onClick={() => onInteractionClick('DISLIKE')}>
+                            {reactions.disliked ? <FaThumbsDown size="1rem" /> : <FaRegThumbsDown size="1rem" />}
+                        </ActionIcon>
+                        <Text>{counts.dislikedCount}</Text>
+                    </Flex>
 
-            {commentModalOpen && (
-                <PostModal
-                    onClose={() => setCommentModalOpen(false)}
-                    visible={commentModalOpen}
-                    post={post}
-                />
-            )}
-        </div>
-    )
-};
+                    <ActionIcon variant='transparent' onClick={open}>
+                        <FaRegComment size="1rem" />
+                    </ActionIcon>
+                </Group>
 
-export default PostComponent;
+                <HoverCard.Dropdown sx={{ pointerEvents: 'none' }}>
+                    <ProfileHighlightCard user={post.author} />
+                </HoverCard.Dropdown>
+            </HoverCard>
+
+            <Modal opened={modalOpened} onClose={close} title="Post comments">
+                <PostComments post={post} />
+            </Modal>
+        </Paper>
+    );
+}
+
+export default PostSimple;

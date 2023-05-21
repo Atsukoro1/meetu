@@ -166,6 +166,15 @@ const userRouter = createTRPCRouter({
       return followings;
     }),
 
+  getMyself: protectedProcedure
+    .query(async ({ ctx }) => {
+      return await prisma.user.findFirst({
+        where: {
+          id: ctx.session.user.id
+        }
+      });
+    }),
+
   me: protectedProcedure
     .query(async ({ ctx }) => {
       const user = ctx.session.user;
