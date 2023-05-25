@@ -103,7 +103,7 @@ export enum Tab {
 }
 
 const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
-    const { data } = useSession();
+    const { data: session } = useSession();
     const { classes, theme } = useStyles();
     const [opened, { toggle }] = useDisclosure(false);
     const { colorScheme, toggleColorScheme } = useMantineColorScheme();
@@ -117,7 +117,7 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
                     <Link style={{ textDecoration: "none", color: theme.colorScheme === 'dark' ? 'white' : "black" }} href="/">
                         <Flex display="flex">
                             <FaTwitter color={theme.colorScheme[1]} size={30} />
-                            <Text weight={900} color={theme.colorScheme[0]} ml={4}>Crazy</Text>
+                            <Text weight={900} color={theme.colorScheme[0]} ml={4}>MEETU</Text>
                         </Flex>
                     </Link>
 
@@ -134,10 +134,12 @@ const Navbar = ({ onTabSelect }: HeaderTabsProps) => {
                             {dark ? <IconSun size="1.1rem" /> : <IconMoonStars size="1.1rem" />}
                         </ActionIcon>
 
-                        <Flex gap={10}>
-                            <UserMenu />
-                            <NotificationsMenu />
-                        </Flex>
+                        {session?.user && (
+                            <Flex gap={10}>
+                                <UserMenu />
+                                <NotificationsMenu />
+                            </Flex>
+                        )}
                     </Group>
                 </Group>
             </Container>

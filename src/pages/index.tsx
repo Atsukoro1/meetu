@@ -118,7 +118,6 @@ export default function SignIn({ providers }: InferGetServerSidePropsType<typeof
 
         <div className={classes.controls}>
           <DiscordButton/>
-          <GithubButton/>
         </div>
       </div>
 
