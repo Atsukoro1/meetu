@@ -1,4 +1,3 @@
-import { AiFillPicture } from 'react-icons/ai';
 import { FilePond } from 'react-filepond';
 import { uploadFile } from '@/utils/supabase';
 import { api } from '@/utils/api';
