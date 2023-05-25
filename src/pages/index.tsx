@@ -111,8 +111,7 @@ export default function SignIn({ providers }: InferGetServerSidePropsType<typeof
 
         <Container p={0} size={600}>
           <Text size="lg" color="dimmed" className={classes.description}>
-            Build more reliable software with AI companion. AI is also trained to detect lazy
-            developers who do nothing and just complain on Twitter.
+            MEETU the best twitter clone to talk with your friends and close people
           </Text>
         </Container>
 
