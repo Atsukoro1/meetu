@@ -16,7 +16,7 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({ src, alt, ...prop
   if(error) {
     return <Image {...props} src={null} withPlaceholder />
   } else {
-    return <img src={src} onError={handleError} alt={alt} {...props} />
+    return <img style={{ filter: "blur(10px)" }} src={src} onError={handleError} alt={alt} {...props} />
   }
 }
 

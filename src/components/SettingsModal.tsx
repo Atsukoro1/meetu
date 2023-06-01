@@ -42,7 +42,7 @@ const SettingsModal = ({ onClose }: { onClose: () => void; }) => {
                         {...form.getInputProps('age')}
                         icon={<FaPersonBooth size="1rem" />}
                         placeholder="Your age"
-                        label="flkdjflkd"
+                        label="Age"
                         withAsterisk
                         min={1}
                         max={130}

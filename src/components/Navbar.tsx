@@ -22,7 +22,6 @@ import {
 } from '@tabler/icons-react';
 import { useSession } from 'next-auth/react';
 import { FaTwitter } from 'react-icons/fa';
-import SettingsModal from './SettingsModal';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import NotificationsMenu from './NotificationsMenu';
