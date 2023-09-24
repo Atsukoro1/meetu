@@ -13,9 +13,9 @@ const Tip = ({ actionText, keys }: TipProps) => {
             <Flex>
                 {keys.map((el: string, index: number, _arr: string[]) => {
                     if(index % 2 == 1) {
-                        return <Text>+</Text>
+                        return <Text key={index}>+</Text>
                     } else {
-                        return <Kbd>{el}</Kbd>
+                        return <Kbd key={index}>{el}</Kbd>
                     }
                 })}
             </Flex>

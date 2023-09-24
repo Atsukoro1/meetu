@@ -89,6 +89,8 @@ model PostLike {
   post      Post   @relation("Likes", fields: [postId], references: [id])
   user      User   @relation("Likes", fields: [userId], references: [id])
 
+  createdAt DateTime @default(now())
+
   @@id([postId, userId])
 }
 
@@ -98,15 +100,20 @@ model PostDislike {
   post      Post   @relation("Dislikes", fields: [postId], references: [id])
   user      User   @relation("Dislikes", fields: [userId], references: [id])
 
+  createdAt DateTime @default(now())
+
   @@id([postId, userId])
 }
 
 model Post {
   id        String      @id @default(cuid())
   createdAt DateTime    @default(now())
-  content   String?
   author    User        @relation("Author", fields: [authorId], references: [id])
   authorId  String
+
+  content   String?
+  mentions  String[]   @default([])
+  tags      String[]   @default([])
 
   comments  Comment[]   @relation("PostComments")
   likes     PostLike[]  @relation("Likes")

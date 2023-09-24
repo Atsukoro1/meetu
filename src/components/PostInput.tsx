@@ -162,7 +162,7 @@ const PostInput = ({ onCreate }: { onCreate: (data: ExtendedPost) => void; }) =>
 
             <Grid className={classes.uploadedImageContainer}>
                 {files.map((file, index) => (
-                    <Grid.Col onClick={() => onFileRemove(index)} span={4}>
+                    <Grid.Col key={file.name} onClick={() => onFileRemove(index)} span={4}>
                         <AspectRatio ratio={13 / 9} maw={150} mx="auto" className={classes.uploadedImage}>
                             <Image
                                 src={URL.createObjectURL(file)}

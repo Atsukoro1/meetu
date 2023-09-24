@@ -1,6 +1,7 @@
-version: '3.8'
+version: "3.8"
 services:
-  db:
+  database:
+    container_name: postgres
     image: postgres:13
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -11,5 +12,32 @@ services:
     ports:
       - 5432:5432
 
+  websockets:
+    container_name: soketi
+    image: quay.io/soketi/soketi:latest
+    ports:
+      - 6001:6001
+    environment:
+      - SOKETI_APP_MANAGER_DRIVER=array
+      - SOKETI_DEFAULT_APP_ID=${SOKETI_APP_ID}
+      - SOKETI_DEFAULT_APP_KEY=${SOKETI_APP_KEY}
+      - SOKETI_DEFAULT_APP_SECRET=${SOKETI_APP_SECRET}
+      - SOKETI_MAX_CONNS=${SOKETI_MAX_CONNS}
+
+  bucket:
+    container_name: minio
+    image: minio/minio:latest
+    ports:
+      - 9000:9000
+
+  metarank:
+    image: metarank/metarank:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config:/opt/metarank/config
+      - ./data:/opt/metarank/data
+    command: standalone --config /opt/metarank/config/metarank.config.yml --data /opt/metarank/data/events.jsonl.gz
+
 volumes:
-  db_data:
+  db_data: {}

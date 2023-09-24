@@ -180,7 +180,8 @@ const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
                     <Flex gap={5} direction="row" wrap="wrap">
                     {data.hobbies.map(el => {
                             return (
-                                <Badge 
+                                <Badge  
+                                    key={el}
                                     onClick={() => removeHobby(el)} 
                                     rightSection={<FaTrash/>}
                                     size="lg"
@@ -212,7 +213,7 @@ const StepTwo = ({ onResult }: { onResult: (data: StepTwoResult) => void }) => {
                     <Box>
                         <Flex direction="row" wrap="wrap">
                             {data.socials.map(el => {
-                                return (<Badge size='lg'>{el.text}</Badge>)
+                                return (<Badge key={el.url} size='lg'>{el.text}</Badge>)
                             })}
                         </Flex>
 

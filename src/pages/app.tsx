@@ -5,12 +5,14 @@ import { getServerSession } from "next-auth";
 import PostLayout from "@/layouts/PostLayout";
 import MessageLayout from "@/layouts/MessageLayout";
 import { Tab } from "@/components/Navbar";
+import { api } from "@/utils/api";
 
 const AppPage = ({
     page,
     recentUsers,
     userWithoutSensitiveData
 }: InferGetServerSidePropsType<typeof getServerSideProps> & { page: Tab }) => {
+    api.post.listMetarankInteractions.useQuery();
     switch(page) {
         case Tab.EXPLORE: 
             return <PostLayout recentUsers={recentUsers} userWithoutSensitiveData={userWithoutSensitiveData} />;
